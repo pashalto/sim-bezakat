@@ -1,0 +1,64 @@
+{
+  "name": "figma-make-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/run.mjs dev",
+    "build": "node scripts/run.mjs build",
+    "start": "node scripts/run.mjs start",
+    "typecheck": "tsc --noEmit",
+    "format": "oxfmt",
+    "generate:importmap": "node scripts/run.mjs payload generate:importmap",
+    "generate:types": "node scripts/run.mjs payload generate:types",
+    "payload": "node scripts/run.mjs payload",
+    "config:init": "node scripts/config-init.mjs",
+    "db:check": "node scripts/database.mjs check",
+    "db:migrate": "node scripts/database.mjs migrate",
+    "db:seed": "node scripts/database.mjs seed",
+    "db:verify": "node scripts/database.mjs verify"
+  },
+  "dependencies": {
+    "@payloadcms/figma": "1.0.0-beta.1",
+    "@payloadcms/next": "4.0.0-beta.7",
+    "@payloadcms/plugin-cloud-storage": "4.0.0-beta.7",
+    "@payloadcms/plugin-mcp": "4.0.0-beta.7",
+    "@payloadcms/richtext-lexical": "4.0.0-beta.7",
+    "@payloadcms/translations": "4.0.0-beta.7",
+    "@payloadcms/ui": "4.0.0-beta.7",
+    "bcryptjs": "^3.0.3",
+    "graphql": "^16.8.1",
+    "html-react-parser": "^5.2.10",
+    "iron-session": "^9.1.0",
+    "monaco-editor": "0.55.1",
+    "next": "16.4.2",
+    "payload": "4.0.0-beta.7",
+    "pg": "^8.23.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "24.12.3",
+    "@types/pg": "^8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "oxfmt": "^0.73.0",
+    "postcss": "^8.5.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=24.22.1",
+    "pnpm": "^9 || ^10 || ^11"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
+}

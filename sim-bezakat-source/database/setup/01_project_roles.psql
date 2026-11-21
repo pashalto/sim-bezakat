@@ -1,0 +1,31 @@
+\set ON_ERROR_STOP on
+-- Hanya lewat psql lokal sebagai admin; password dimasukkan tersembunyi.
+DO $$ DECLARE r record; pemilik text; BEGIN
+  IF inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) THEN
+    RAISE EXCEPTION 'Hanya server lokal yang diperbolehkan'; END IF;
+  SELECT pg_get_userbyid(datdba) INTO pemilik FROM pg_database WHERE datname='sim_bezakat_dev';
+  IF pemilik IS NOT NULL AND pemilik<>'sim_bezakat_migrator' THEN
+    RAISE EXCEPTION 'sim_bezakat_dev sudah ada dengan pemilik berbeda. Berhenti untuk pemeriksaan; jangan DROP database'; END IF;
+  FOR r IN SELECT * FROM pg_roles WHERE rolname IN ('sim_bezakat_migrator','sim_bezakat_app') LOOP
+    IF r.rolsuper OR r.rolcreatedb OR r.rolcreaterole OR r.rolbypassrls OR r.rolreplication
+      OR EXISTS(SELECT 1 FROM pg_auth_members WHERE member=r.oid) THEN
+      RAISE EXCEPTION 'Role proyek yang sudah ada memiliki hak berbeda. Berhenti untuk pemeriksaan'; END IF;
+  END LOOP;
+END $$;
+SELECT 'CREATE ROLE sim_bezakat_migrator LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT'
+WHERE NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='sim_bezakat_migrator') \gexec
+SELECT 'CREATE ROLE sim_bezakat_app LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT'
+WHERE NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='sim_bezakat_app') \gexec
+SELECT 'CREATE DATABASE sim_bezakat_dev OWNER sim_bezakat_migrator'
+WHERE NOT EXISTS(SELECT 1 FROM pg_database WHERE datname='sim_bezakat_dev') \gexec
+\connect sim_bezakat_dev
+DO $$ BEGIN
+  IF current_database()<>'sim_bezakat_dev' THEN RAISE EXCEPTION 'Target salah'; END IF;
+END $$;
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+GRANT CONNECT ON DATABASE sim_bezakat_dev TO sim_bezakat_app;
+\echo 'Tentukan password migrator. Simpan sendiri untuk BEZAKAT_MIGRATION_PASSWORD.'
+\password sim_bezakat_migrator
+\echo 'Tentukan password aplikasi (boleh berbeda). Simpan sendiri untuk BEZAKAT_DB_PASSWORD.'
+\password sim_bezakat_app
+\echo 'Selesai. Isi .env.local sendiri, lalu jalankan npm.cmd run db:migrate.'
