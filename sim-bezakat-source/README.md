@@ -2,9 +2,27 @@
 
 Portal pemantauan Beasiswa Zakat Indonesia untuk awardee, koordinator, LAZ, dan Kemenag. Versi ini memakai desain Figma Make dengan Next.js, React, TypeScript, dan Tailwind. Portal lokal menyimpan draf lewat API Next.js ke PostgreSQL. Proyek juga memuat koleksi dan rute Payload dari ekspor Figma.
 
-## Menjalankan di Windows
+## Menjalankan demo tanpa database
 
-1. Ekstrak ZIP dan buka folder **sim-bezakat-source** yang berisi `package.json`. Dari File Explorer, buka Terminal di folder tersebut. Siapkan Node.js 24.22.1 atau lebih baru dan PostgreSQL lokal (pengujian menggunakan PostgreSQL 18).
+Gunakan Node.js 24.22.1 atau lebih baru dan pnpm 10.34.3. Buka terminal di folder yang berisi `package.json`.
+
+```powershell
+pnpm install --frozen-lockfile
+pnpm run config:init
+```
+
+Di `.env.local`, pertahankan `BEZAKAT_STORAGE=demo` dan isi sendiri `BEZAKAT_DEMO_PASSWORD` untuk login. Kolom koneksi database dapat dibiarkan seperti contoh. Kata sandi demo digunakan di server. Akun awardee fiktif yang bisa dicoba adalah `BZI-251-0000001`.
+
+```powershell
+pnpm run build
+pnpm run start
+```
+
+Buka alamat lokal yang ditampilkan di terminal. Untuk mengedit portal sambil melihat perubahan, jalankan `pnpm run dev`. Konfigurasi deployment mode demo menggunakan variabel server yang sama.
+
+## Menjalankan dengan PostgreSQL di Windows
+
+1. Buka folder **sim-bezakat-source** yang berisi `package.json`. Dari File Explorer, buka Terminal di folder tersebut. Siapkan Node.js 24.22.1 atau lebih baru dan PostgreSQL lokal (pengujian menggunakan PostgreSQL 18).
 2. Pasang dependensi sesuai lockfile dan buat konfigurasi lokal satu kali.
 
    ```powershell
@@ -18,7 +36,7 @@ Portal pemantauan Beasiswa Zakat Indonesia untuk awardee, koordinator, LAZ, dan 
    & 'C:\Program Files\PostgreSQL\18\bin\psql.exe' -X -h 127.0.0.1 -p 5432 -U postgres -W -d postgres -f database/setup/01_project_roles.psql
    ```
 
-4. Buka `.env.local` dengan editor. Isi `BEZAKAT_DB_PASSWORD` dengan password akun aplikasi dan `BEZAKAT_MIGRATION_PASSWORD` dengan password migrator. Pertahankan kunci sesi acak yang dibuat oleh `config:init`. Untuk akun fiktif pada instalasi baru, pilih sendiri `BEZAKAT_DEMO_PASSWORD` (maksimal 72 byte) dan simpan file. File `.env.example` adalah contoh yang boleh masuk ke Git.
+4. Buka `.env.local` dengan editor. Atur `BEZAKAT_STORAGE=postgres`. Isi `BEZAKAT_DB_PASSWORD` dengan password akun aplikasi dan `BEZAKAT_MIGRATION_PASSWORD` dengan password migrator. Pertahankan kunci sesi acak yang dibuat oleh `config:init`. Untuk akun fiktif pada instalasi baru, pilih sendiri `BEZAKAT_DEMO_PASSWORD` (maksimal 72 byte) dan simpan file. File `.env.example` adalah contoh yang boleh masuk ke Git.
 5. Pasang migrasi dan periksa koneksi. Migrasi yang sudah tercatat akan dilewati.
 
    ```powershell
@@ -50,7 +68,7 @@ Jalankan `npm.cmd run typecheck` dan `npm.cmd run build`. Setelah build selesai,
 
 - `src/components` dan `src/app/(frontend)` berisi tampilan portal dan API. Aset bawaan desain berada di `public`.
 - `src/server` memuat autentikasi, koneksi PostgreSQL, dan pembacaan data sesuai peran.
-- `database/migrations` berisi empat migrasi. Migrasi 004 menambahkan fungsi baca untuk dashboard, profil, dokumen, riwayat, dan monitoring pengelola.
+- `database/migrations` berisi lima migrasi. Migrasi 005 menambahkan penghapusan isian draf periode aktif yang belum pernah diajukan. Migrasi 004 menambahkan fungsi baca untuk dashboard, profil, dokumen, riwayat, dan monitoring pengelola.
 - `database/seeds` berisi contoh fiktif. `database/tests` berisi pemeriksaan SQL untuk database uji. Pengujian hash pada 002 membutuhkan parameter sesi `sim_bezakat.test_password` yang sesuai dengan seed uji.
 - `npm.cmd run typecheck` memeriksa TypeScript. Login, baca data, dan simpan draf tersedia pada mode PostgreSQL. Pengajuan akhir, verifikasi, edit profil, dan unggahan melalui portal masih dalam pengembangan.
 
