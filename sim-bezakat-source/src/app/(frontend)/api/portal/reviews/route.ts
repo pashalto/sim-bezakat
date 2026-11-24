@@ -1,4 +1,4 @@
-import { body, currentUser, failure, json, reviewReport, sameOrigin } from '@/server/portal'
+import { body, currentUser, failure, json, reviewReports, sameOrigin } from '@/server/portal'
 import { portalSession } from '@/server/portal-overview'
 
 export const runtime = 'nodejs'
@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     sameOrigin(request)
     const user = await currentUser()
-    await reviewReport(user, await body(request))
+    await reviewReports(user, await body(request))
     return json(await portalSession(user))
   } catch (error) {
     return failure(error)

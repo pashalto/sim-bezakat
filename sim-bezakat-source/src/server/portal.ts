@@ -130,10 +130,8 @@ const reviewOperations = new Set<ReportReviewInput['operation']>([
   'approve-report', 'revise-report', 'reject-report',
   'approve-section', 'revise-section', 'approve-finance', 'revise-finance',
 ])
-export async function reviewReport(user: PortalUser, value: unknown) {
-  if (user.role !== 'coordinator') throw new PortalError(403, 'Hanya koordinator dapat memeriksa laporan.')
+function validateReviewAction(reportId: unknown, value: unknown): ReportReviewInput {
   if (!object(value)) throw new PortalError(400, 'Pemeriksaan tidak valid.')
-  const reportId = value.reportId
   const operation = value.operation
   const target = value.target
   const issues = value.issues
@@ -165,11 +163,35 @@ export async function reviewReport(user: PortalUser, value: unknown) {
       }
     }
   }
+  return { reportId, operation: operation as ReportReviewInput['operation'], target, issues: cleanIssues }
+}
+
+export async function reviewReports(user: PortalUser, value: unknown) {
+  if (user.role !== 'coordinator') throw new PortalError(403, 'Hanya koordinator dapat memeriksa laporan.')
+  if (!object(value) || !Array.isArray(value.reviews) || value.reviews.length < 2 || value.reviews.length > 50) {
+    throw new PortalError(400, 'Batch pemeriksaan tidak valid.')
+  }
+  const reviews = value.reviews.map(review => validateReviewAction(value.reportId, review))
+  const keys = reviews.map(review => `${review.target}:${review.operation.endsWith('section') ? 'section' : review.operation.endsWith('finance') ? 'finance' : 'report'}`)
+  if (new Set(keys).size !== keys.length || reviews.filter(review => review.target === 'report').length !== 1) {
+    throw new PortalError(400, 'Target pemeriksaan tidak boleh ganda.')
+  }
   return withDatabase(async client => {
-    const { rows: [row] } = await client.query<{detail: unknown}>(
-      'SELECT sim_bezakat.portal_simpan_pemeriksaan($1,$2,$3,$4,$5::jsonb) AS detail',
-      [user.id, reportId, operation, target, JSON.stringify(cleanIssues)],
-    )
-    return row.detail
+    await client.query('BEGIN')
+    try {
+      let detail: unknown
+      for (const review of reviews) {
+        const { rows: [row] } = await client.query<{detail: unknown}>(
+          'SELECT sim_bezakat.portal_simpan_pemeriksaan($1,$2,$3,$4,$5::jsonb) AS detail',
+          [user.id, review.reportId, review.operation, review.target, JSON.stringify(review.issues ?? [])],
+        )
+        detail = row.detail
+      }
+      await client.query('COMMIT')
+      return detail
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    }
   })
 }

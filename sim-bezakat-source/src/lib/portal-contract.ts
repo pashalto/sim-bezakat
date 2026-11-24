@@ -8,6 +8,11 @@ export type ReportReviewInput = {
   target: string
   issues?: Array<{ questionId: string; reason: string }>
 }
+export type ReportReviewAction = Omit<ReportReviewInput, 'reportId'>
+export type ReportReviewBatchInput = {
+  reportId: string
+  reviews: ReportReviewAction[]
+}
 export type PortalSession = {
   user: import('./demo-data').DemoAccount
   state: import('./demo-data').DemoState
