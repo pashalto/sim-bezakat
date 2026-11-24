@@ -1,0 +1,455 @@
+status: exited
+stdout file: /figaro/tool-output/bash/0/stdout (72224 bytes)
+stderr file: /figaro/tool-output/bash/0/stderr (0 bytes)
+exit code: 0
+
+OUTPUT TRUNCATED: the head-and-tail previews below are INCOMPLETE; the middle is omitted. Complete output is saved at the stdout/stderr paths above. If your task depends on omitted content, you MUST use `read` on the relevant file and follow its continuation offsets through the required content before generating or changing code. Do not guess or infer omitted content from the preview. Reading with bash again can truncate again.
+
+--- stdout (head + tail; full output in file above) ---
+--- coordinator/report UI references ---
+src/server/portal.ts:42:const roles={awardee:['awardee','Awardee'],koordinator:['coordinator','Koordinator Beasiswa'],laz:['institution','Pengelola LAZ'],kemenag:['ministry','Pengelola Kemenag']} as const
+src/server/portal-overview.ts:8:type Report = Pick<PeriodRecord, 'ownerId' | 'month' | 'year' | 'activities' | 'answers' | 'financeDocuments' | 'reviewHistory' | 'submittedAt'> & {
+src/server/portal-overview.ts:41:  draf: 'draft', perlu_revisi: 'revision', disetujui: 'approved', diajukan: 'submitted',
+src/server/portal-overview.ts:60:        financeDocuments: details?.financeDocuments ?? [], reviewHistory: details?.reviewHistory ?? [],
+src/server/portal-overview.ts:61:        submittedAt: details?.submittedAt,
+src/lib/portal-contract.ts:2:export type PortalUser={id:string; username:string; name:string; role:'awardee'|'coordinator'|'institution'|'ministry'; roleLabel:string}
+src/lib/report-questions.ts:383:          'Koordinator',
+src/lib/demo-data.ts:3:export type Role = 'awardee' | 'coordinator' | 'institution' | 'ministry'
+src/lib/demo-data.ts:4:export type ReviewStatus = 'draft' | 'submitted' | 'review' | 'revision' | 'approved'
+src/lib/demo-data.ts:53:export type FinanceDocument = {
+src/lib/demo-data.ts:102:  financeDocuments: FinanceDocument[]
+src/lib/demo-data.ts:103:  submittedAt?: string
+src/lib/demo-data.ts:141:    id: 'coordinator-nadia',
+src/lib/demo-data.ts:144:    role: 'coordinator',
+src/lib/demo-data.ts:145:    roleLabel: 'Koordinator Awardee',
+src/lib/demo-data.ts:265:const financeDocs = (prefix: string, status: ReviewStatus = 'approved'): FinanceDocument[] => [
+src/lib/demo-data.ts:280:    status: 'approved',
+src/lib/demo-data.ts:288:  financeStatus: ReviewStatus = 'approved',
+src/lib/demo-data.ts:291:  const reviews = defaultReviews(status === 'approved' ? 'approved' : status)
+src/lib/demo-data.ts:316:    financeDocuments:
+src/lib/demo-data.ts:319:        : financeDocs(`${year}-${String(month).padStart(2, '0')}`, financeStatus),
+src/lib/demo-data.ts:320:    submittedAt:
+src/lib/demo-data.ts:332:              actor: 'Koordinator',
+src/lib/demo-data.ts:334:                status === 'approved' ? 'Seluruh bagian laporan disetujui.' : 'Laporan diperiksa.',
+src/lib/demo-data.ts:390:  const january = period('awardee-aulia', 1, 'approved')
+src/lib/demo-data.ts:392:  const february = period('awardee-aulia', 2, 'approved')
+src/lib/demo-data.ts:394:  const march = period('awardee-aulia', 3, 'revision')
+src/lib/demo-data.ts:395:  march.sectionReviews = defaultReviews('approved')
+src/lib/demo-data.ts:397:    status: 'revision',
+src/lib/demo-data.ts:400:  march.reportStatus = 'revision'
+src/lib/demo-data.ts:407:  const april = period('awardee-aulia', 4, 'approved', 'revision')
+src/lib/demo-data.ts:408:  april.financeDocuments[0].status = 'revision'
+src/lib/demo-data.ts:409:  april.financeDocuments[0].reason = 'Berkas tidak terbaca'
+src/lib/demo-data.ts:419:    period('awardee-fikri', 1, 'approved'),
+src/lib/demo-data.ts:420:    period('awardee-fikri', 2, 'approved'),
+src/lib/demo-data.ts:421:    period('awardee-fikri', 3, 'submitted'),
+src/lib/demo-data.ts:423:    period('awardee-salma', 1, 'approved'),
+src/lib/demo-data.ts:424:    period('awardee-salma', 2, 'revision'),
+src/lib/demo-data.ts:463:    submitted: 'Terkirim',
+src/lib/demo-data.ts:465:    revision: 'Perlu perbaikan',
+src/lib/demo-data.ts:466:    approved: 'Disetujui',
+src/lib/demo-data.ts:471:export function financeStatus(record: PeriodRecord): ReviewStatus {
+src/lib/demo-data.ts:472:  if (!record.financeDocuments.length) return 'draft'
+src/lib/demo-data.ts:473:  if (record.financeDocuments.some((doc) => doc.status === 'revision')) return 'revision'
+src/lib/demo-data.ts:474:  if (record.financeDocuments.every((doc) => doc.status === 'approved')) return 'approved'
+src/lib/demo-data.ts:475:  if (record.financeDocuments.every((doc) => doc.status === 'draft')) return 'draft'
+src/lib/demo-data.ts:476:  if (record.financeDocuments.some((doc) => doc.status === 'review')) return 'review'
+src/lib/demo-data.ts:477:  return 'submitted'
+src/lib/demo-data.ts:481:  const finance = financeStatus(record)
+src/lib/demo-data.ts:482:  if (record.reportStatus === 'revision' || finance === 'revision') return 'revision'
+src/lib/demo-data.ts:483:  if (record.reportStatus === 'approved' && finance === 'approved') return 'approved'
+src/lib/demo-data.ts:484:  if (record.reportStatus === 'draft' && finance === 'draft') return 'draft'
+src/lib/demo-data.ts:485:  if (record.reportStatus === 'approved' && finance !== 'approved') return 'incomplete'
+src/lib/demo-data.ts:486:  return 'submitted'
+src/components/PortalApp.tsx:12:  financeStatus,
+src/components/PortalApp.tsx:21:  type FinanceDocument,
+src/components/PortalApp.tsx:257:    if (!row || row.month !== active.month || row.year !== active.year || row.reportStatus !== 'draft' || row.submittedAt) {
+src/components/PortalApp.tsx:369:        ? ['dashboard', 'profile', 'transcript', 'report', 'finance', 'recap', 'recap-detail']
+src/components/PortalApp.tsx:452:              {(active === 'dashboard' || active === 'finance') && !currentPeriod && (
+src/components/PortalApp.tsx:511:                  readOnly={!!persistDraft && !['draft','revision'].includes(editingPeriod.reportStatus)}
+src/components/PortalApp.tsx:519:                  onSubmitted={() => {
+src/components/PortalApp.tsx:525:              {active === 'finance' && currentPeriod && (
+src/components/PortalApp.tsx:526:                <FinancePage
+src/components/PortalApp.tsx:580:                    navigate(account.role === 'coordinator' ? 'awardees' : 'monitoring')
+src/components/PortalApp.tsx:604:  const submit = async (event: React.FormEvent) => {
+src/components/PortalApp.tsx:686:            <form onSubmit={submit} className="mt-9 space-y-5">
+src/components/PortalApp.tsx:772:    { key: 'finance', label: 'Keuangan', icon: 'wallet' as IconName },
+src/components/PortalApp.tsx:776:    account.role === 'coordinator'
+src/components/PortalApp.tsx:1011:  const finance = financeStatus(currentPeriod)
+src/components/PortalApp.tsx:1012:  const revisionCount = connected ? periods.filter(p => p.reportStatus === 'revision').length : periods.reduce(
+src/components/PortalApp.tsx:1019:      period.financeDocuments.filter((document) => document.status === 'revision').length,
+src/components/PortalApp.tsx:1054:          value={finance === 'draft' ? 'Belum ada' : statusLabel(finance)}
+src/components/PortalApp.tsx:1055:          note={`${currentPeriod.financeDocuments.length}/2 dokumen`}
+src/components/PortalApp.tsx:1062:          value={String(revisionCount)}
+src/components/PortalApp.tsx:1100:              description={`${currentPeriod.financeDocuments.length} dari 2 kategori terunggah`}
+src/components/PortalApp.tsx:1101:              status={finance}
+src/components/PortalApp.tsx:1103:              onClick={() => navigate('finance')}
+src/components/PortalApp.tsx:1105:            {revisionCount > 0 && (
+src/components/PortalApp.tsx:1109:                description={`${revisionCount} catatan pemeriksaan pada periode sebelumnya`}
+src/components/PortalApp.tsx:1110:                status="revision"
+src/components/PortalApp.tsx:1646:      {scholarshipStatus ? <p className="mt-4 rounded-xl bg-slate-50 p-4 text-xs font-semibold">Status beasiswa: {scholarshipStatus}. Evaluasi memakai IPS terverifikasi per semester.</p> : <GpaRiskNotice latestGpa={latestGpa} belowMinimumCount={belowMinimumCount} />}
+src/components/PortalApp.tsx:1676:            menyebabkan penghentian beasiswa. Segera hubungi koordinator untuk tindak lanjut
+src/components/PortalApp.tsx:1695:            koordinator.
+src/components/PortalApp.tsx:1777:    if (file.type !== 'application/pdf') {
+src/components/PortalApp.tsx:1778:      onToast('Transkrip harus menggunakan format PDF.')
+src/components/PortalApp.tsx:1794:      status: existing?.status === 'revision' ? 'revision' : 'draft',
+src/components/PortalApp.tsx:1795:      reason: existing?.status === 'revision' ? existing.reason : undefined,
+src/components/PortalApp.tsx:1807:              status: item.status === 'revision' ? 'review' : 'submitted',
+src/components/PortalApp.tsx:1831:          {connected ? 'KHS dan nilai terverifikasi ditampilkan per semester. Halaman ini hanya dapat dibaca.'
+src/components/PortalApp.tsx:1832:            : 'Unggah satu transkrip PDF untuk setiap semester. Semester berikutnya akan terbuka setelah semester acuan pada Profil diperbarui.'}
+src/components/PortalApp.tsx:1839:          const locked = transcript?.status === 'approved'
+src/components/PortalApp.tsx:1844:                transcript?.status === 'revision' ? 'border-rose-300' : 'border-slate-200'
+src/components/PortalApp.tsx:1904:                      {transcript ? 'Ganti' : 'Unggah PDF'}
+src/components/PortalApp.tsx:1907:                        accept="application/pdf,.pdf"
+src/components/PortalApp.tsx:1915:                    (transcript.status === 'draft' || transcript.status === 'revision') && (
+src/components/PortalApp.tsx:1948:  onSubmitted,
+src/components/PortalApp.tsx:1959:  onSubmitted: () => void
+src/components/PortalApp.tsx:1980:  const eligible = isActivePeriod && !readOnly && period.reportStatus === 'draft' && !period.submittedAt
+src/components/PortalApp.tsx:1984:  const locked = readOnly || saving || (review?.status === 'approved' && period.reportStatus !== 'draft')
+src/components/PortalApp.tsx:2029:  const submit = () => {
+src/components/PortalApp.tsx:2040:    const nextStatus = period.reportStatus === 'revision' ? 'review' : 'submitted'
+src/components/PortalApp.tsx:2043:      if (value.status === 'revision') nextReviews[key] = { ...value, status: 'review' }
+src/components/PortalApp.tsx:2045:    const submitted: PeriodRecord = {
+src/components/PortalApp.tsx:2049:      submittedAt: new Date().toISOString(),
+src/components/PortalApp.tsx:2057:            period.reportStatus === 'revision'
+src/components/PortalApp.tsx:2063:    updatePeriod(submitted)
+src/components/PortalApp.tsx:2065:    onSubmitted()
+src/components/PortalApp.tsx:2270:                  onClick={submit}
+src/components/PortalApp.tsx:2341:            <p className="text-xs font-extrabold text-amber-900">Catatan instrumen</p>
+src/components/PortalApp.tsx:2662:function FinancePage({
+src/components/PortalApp.tsx:2689:    const existing = period.financeDocuments.find((item) => item.category === category)
+src/components/PortalApp.tsx:2690:    const document: FinanceDocument = {
+src/components/PortalApp.tsx:2696:      status: existing?.status === 'revision' ? 'revision' : 'draft',
+src/components/PortalApp.tsx:2697:      reason: existing?.status === 'revision' ? existing.reason : undefined,
+src/components/PortalApp.tsx:2701:      financeDocuments: [
+src/components/PortalApp.tsx:2702:        ...period.financeDocuments.filter((item) => item.category !== category),
+src/components/PortalApp.tsx:2709:  const send = (document: FinanceDocument) => {
+src/components/PortalApp.tsx:2712:      financeDocuments: period.financeDocuments.map((item) =>
+src/components/PortalApp.tsx:2716:              status: item.status === 'revision' ? 'review' : 'submitted',
+src/components/PortalApp.tsx:2738:        description={connected ? 'Lihat dokumen Excel atau PDF terbaru untuk periode ini.' : 'Unggah dokumen spreadsheet/Excel per periode.'}
+src/components/PortalApp.tsx:2754:          const document = period.financeDocuments.find((item) => item.category === category.key)
+src/components/PortalApp.tsx:2755:          const locked = document?.status === 'approved'
+src/components/PortalApp.tsx:2760:                document?.status === 'revision' ? 'border-rose-300' : 'border-slate-200'
+src/components/PortalApp.tsx:2778:                    document.status === 'revision'
+src/components/PortalApp.tsx:2810:                  <p className="mt-1 text-[9px] text-slate-400">{connected ? 'Excel atau PDF' : '.xlsx atau .xls'}</p>
+src/components/PortalApp.tsx:2853:                  {!locked && (document.status === 'draft' || document.status === 'revision') && (
+src/components/PortalApp.tsx:2868:        {connected ? 'Versi terbaru berkas Excel atau PDF dari database. Unggahan belum tersedia.' : 'Pada prototype ini, hanya metadata berkas yang disimpan di browser.'}
+src/components/PortalApp.tsx:2884:  const approvedCount = visible.filter((period) => period.reportStatus === 'approved').length
+src/components/PortalApp.tsx:2885:  const submittedCount = visible.filter(
+src/components/PortalApp.tsx:2886:    (period) => period.reportStatus === 'submitted' || period.reportStatus === 'review',
+src/components/PortalApp.tsx:2888:  const revisionCount = visible.filter((period) => period.reportStatus === 'revision').length
+src/components/PortalApp.tsx:2914:          value={approvedCount}
+src/components/PortalApp.tsx:2920:          value={submittedCount}
+src/components/PortalApp.tsx:2925:          label="Perlu Direvisi"
+src/components/PortalApp.tsx:2926:          value={revisionCount}
+src/components/PortalApp.tsx:2986:  const finance = financeStatus(period)
+src/components/PortalApp.tsx:2999:            {period.submittedAt ? `Dikirim ${formatDateTime(period.submittedAt)}` : 'Belum dikirim'}
+src/components/PortalApp.tsx:3004:      <StatusColumn label="Keuangan" status={finance} />
+src/components/PortalApp.tsx:3037:  const revisionSection = reportSections.find(
+src/components/PortalApp.tsx:3038:    (section) => period.sectionReviews[section.key]?.status === 'revision',
+src/components/PortalApp.tsx:3070:                      {review?.status === 'revision' && (
+src/components/PortalApp.tsx:3084:            {openReport && <button className="mt-5 icon-action" onClick={openReport}>{period.reportStatus === "revision" ? "Perbaiki laporan" : period.reportStatus === "draft" ? "Lanjutkan draf" : "Buka laporan"}</button>}
+src/components/PortalApp.tsx:3085:            {!openReport && revisionSection && (
+src/components/PortalApp.tsx:3087:                onClick={() => onRepair(revisionSection.key)}
+src/components/PortalApp.tsx:3091:                Perbaiki {revisionSection.label}
+src/components/PortalApp.tsx:3095:          <FinanceDetail period={period} onToast={onToast} />
+src/components/PortalApp.tsx:3135:function FinanceDetail({
+src/components/PortalApp.tsx:3145:      {period.financeDocuments.length ? (
+src/components/PortalApp.tsx:3147:          {period.financeDocuments.map((document) => (
+src/components/PortalApp.tsx:3151:                document.status === 'revision' ? 'border-rose-300 bg-rose-50' : 'border-slate-200'
+src/components/PortalApp.tsx:3255:    (period) => period.reportStatus === 'submitted' || financeStatus(period) === 'submitted',
+src/components/PortalApp.tsx:3257:  const revisions = periods.filter(
+src/components/PortalApp.tsx:3258:    (period) => period.reportStatus === 'revision' || financeStatus(period) === 'revision',
+src/components/PortalApp.tsx:3260:  const approved = periods.filter((period) => overallStatus(period) === 'approved').length
+src/components/PortalApp.tsx:3267:          account.role === 'coordinator'
+src/components/PortalApp.tsx:3290:          value={String(revisions)}
+src/components/PortalApp.tsx:3297:          value={String(approved)}
+src/components/PortalApp.tsx:3336:          eyebrow={account.role === 'coordinator' ? 'Pemeriksaan Awardee' : 'Monitoring'}
+src/components/PortalApp.tsx:3405:                                  overallStatus(period) === 'approved'
+src/components/PortalApp.tsx:3407:                                    : overallStatus(period) === 'revision'
+src/components/PortalApp.tsx:3455:  const [financeReview, setFinanceReview] = useState<string | null>(null)
+src/components/PortalApp.tsx:3456:  const readOnly = connected || account.role !== 'coordinator'
+src/components/PortalApp.tsx:3458:  const approveSection = (sectionKey: string) => {
+src/components/PortalApp.tsx:3461:      [sectionKey]: { status: 'approved' as ReviewStatus, issues: [] },
+src/components/PortalApp.tsx:3466:      reportStatus: Object.values(nextReviews).every((item) => item.status === 'approved')
+src/components/PortalApp.tsx:3467:        ? 'approved'
+src/components/PortalApp.tsx:3468:        : 'submitted',
+src/components/PortalApp.tsx:3481:  const requestRevision = (sectionKey: string) => {
+src/components/PortalApp.tsx:3488:      reportStatus: 'revision',
+src/components/PortalApp.tsx:3492:          status: 'revision',
+src/components/PortalApp.tsx:3511:  const updateFinance = (
+src/components/PortalApp.tsx:3512:    document: FinanceDocument,
+src/components/PortalApp.tsx:3516:    if (status === 'revision' && !selectedReason) {
+src/components/PortalApp.tsx:3522:      financeDocuments: period.financeDocuments.map((item) =>
+src/components/PortalApp.tsx:3524:          ? { ...item, status, reason: status === 'revision' ? selectedReason : undefined }
+src/components/PortalApp.tsx:3533:            status === 'approved'
+src/components/PortalApp.tsx:3539:    setFinanceReview(null)
+src/components/PortalApp.tsx:3541:      status === 'approved'
+src/components/PortalApp.tsx:3580:                  review?.status === 'revision' ? 'border-rose-300' : 'border-slate-200'
+src/components/PortalApp.tsx:3597:                        onClick={() => approveSection(section.key)}
+src/components/PortalApp.tsx:3667:                      onClick={() => requestRevision(section.key)}
+src/components/PortalApp.tsx:3681:              {period.financeDocuments.map((document) => (
+src/components/PortalApp.tsx:3685:                    document.status === 'revision'
+src/components/PortalApp.tsx:3705:                          onClick={() => updateFinance(document, 'approved')}
+src/components/PortalApp.tsx:3712:                            setFinanceReview(financeReview === document.id ? null : document.id)
+src/components/PortalApp.tsx:3719:                      {financeReview === document.id && (
+src/components/PortalApp.tsx:3724:                              onClick={() => updateFinance(document, 'revision', item)}
+src/components/PortalApp.tsx:3852:    submitted: 'bg-amber-50 text-amber-700',
+src/components/PortalApp.tsx:3854:    revision: 'bg-rose-50 text-rose-700',
+src/components/PortalApp.tsx:3855:    approved: 'bg-emerald-50 text-emerald-700',
+src/components/PortalApp.tsx:3868:      : status === 'approved'
+src/components/PortalApp.tsx:3870:        : status === 'revision'
+src/components/PortalApp.tsx:3876:    status === 'approved'
+src/components/PortalApp.tsx:3878:      : status === 'revision'
+src/components/PortalApp.tsx:3967:  if (status === 'approved') return 'bg-emerald-600'
+src/components/PortalApp.tsx:3968:  if (status === 'revision') return 'bg-rose-500'
+--- database schema references ---
+database/seeds/001_demo.sql:20:(-2,'koordinator','BZI-251-0000004','koordinator@example.invalid', (current_setting('sim_bezakat.seed_hashes')::jsonb ->> 1),'000000000002'),
+database/seeds/001_demo.sql:22:(-4,'koordinator','BZI-251-0000008','koordinator-b@example.invalid', (current_setting('sim_bezakat.seed_hashes')::jsonb ->> 3),'000000000004'),
+database/seeds/001_demo.sql:30:INSERT INTO koordinator_beasiswa(id_koordinator,kode_koordinator,nama_pembina,wilayah_binaan) VALUES
+database/seeds/001_demo.sql:34:INSERT INTO awardee(id_awardee,nomor_registrasi,id_lembaga,id_koordinator,id_perguruan_tinggi,nim,nik,nama_lengkap,jenis_kelamin,tanggal_lahir,alamat_domisili,program_studi,jenjang_studi) VALUES
+database/seeds/001_demo.sql:52:INSERT INTO laporan_bulanan(id_laporan_bulanan,id_awardee,id_periode_monitoring,
+database/seeds/001_demo.sql:59:INSERT INTO berkas_keuangan_versi(id_berkas,id_laporan_bulanan,jenis_dokumen,nama_asli,mime_type,ukuran_byte,storage_key,diunggah_oleh,versi_template)
+database/seeds/001_demo.sql:60:VALUES(-11,-1,'periode_berjalan','keuangan-demo-v1.pdf','application/pdf',1024,'contoh/keuangan/a/v1.pdf',-101,'template-1');
+database/seeds/001_demo.sql:61:INSERT INTO pengajuan_laporan(id_laporan_bulanan,diajukan_oleh) VALUES(-1,-101);
+database/seeds/001_demo.sql:62:INSERT INTO verifikasi_laporan(id_laporan_bulanan,nomor_pengajuan,tahap_verifikasi,id_koordinator,hasil_verifikasi,catatan_verifikasi)
+database/seeds/001_demo.sql:63:VALUES(-1,1,'koordinator',-2,'perlu_revisi','Contoh: perjelas dokumen keuangan.');
+database/seeds/001_demo.sql:64:UPDATE laporan_bulanan SET ringkasan_refleksi_diri='Refleksi fiktif setelah perbaikan.' WHERE id_laporan_bulanan=-1;
+database/seeds/001_demo.sql:65:INSERT INTO berkas_keuangan_versi(id_berkas,id_laporan_bulanan,jenis_dokumen,nama_asli,mime_type,ukuran_byte,storage_key,diunggah_oleh,versi_template)
+database/seeds/001_demo.sql:66:VALUES(-12,-1,'periode_berjalan','keuangan-demo-v2.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',2048,'contoh/keuangan/a/v2.xlsx',-101,'template-1');
+database/seeds/001_demo.sql:67:INSERT INTO pengajuan_laporan(id_laporan_bulanan,diajukan_oleh,catatan_perbaikan)
+database/seeds/001_demo.sql:69:INSERT INTO verifikasi_laporan(id_laporan_bulanan,nomor_pengajuan,tahap_verifikasi,id_koordinator,hasil_verifikasi) VALUES(-1,2,'koordinator',-2,'disetujui');
+database/seeds/001_demo.sql:70:INSERT INTO verifikasi_laporan(id_laporan_bulanan,nomor_pengajuan,tahap_verifikasi,id_pengelola_laz,hasil_verifikasi) VALUES(-1,2,'laz',-3,'disetujui');
+database/seeds/001_demo.sql:71:INSERT INTO verifikasi_laporan(id_laporan_bulanan,nomor_pengajuan,tahap_verifikasi,id_pengelola_kemenag,hasil_verifikasi) VALUES(-1,2,'kemenag',-1,'disetujui');
+database/seeds/001_demo.sql:83:INSERT INTO verifikasi_akademik(id_versi_akademik,id_koordinator,hasil_verifikasi) VALUES(-10111,-2,'terverifikasi');
+database/seeds/001_demo.sql:84:INSERT INTO verifikasi_akademik(id_versi_akademik,id_koordinator,hasil_verifikasi) VALUES(-10211,-2,'terverifikasi');
+database/seeds/001_demo.sql:85:INSERT INTO verifikasi_akademik(id_versi_akademik,id_koordinator,hasil_verifikasi) VALUES(-10221,-2,'terverifikasi');
+database/seeds/001_demo.sql:86:INSERT INTO verifikasi_akademik(id_versi_akademik,id_koordinator,hasil_verifikasi) VALUES(-10311,-4,'terverifikasi');
+database/seeds/001_demo.sql:87:INSERT INTO verifikasi_akademik(id_versi_akademik,id_koordinator,hasil_verifikasi) VALUES(-10331,-4,'terverifikasi');
+database/tests/001_constraints.sql:38:  PERFORM pg_temp.ok('Seed: dua IPS rendah berurutan menonaktifkan beasiswa',(SELECT status_awardee='nonaktif' FROM awardee WHERE id_awardee=-102));
+database/tests/001_constraints.sql:39:  PERFORM pg_temp.ok('Seed: IPS semester 1 dan 3 tidak dianggap berurutan',(SELECT status_awardee='evaluasi' FROM awardee WHERE id_awardee=-103));
+database/tests/001_constraints.sql:40:  PERFORM pg_temp.ok('Seed: IPS tepat 3,00 tidak rendah meskipun IPK 2,80',(SELECT status_awardee='aktif' FROM awardee WHERE id_awardee=-101));
+database/tests/001_constraints.sql:41:  PERFORM pg_temp.ok('Akun beasiswa nonaktif tetap aktif',(SELECT status_aktif FROM akun_pengguna WHERE id_akun=-102));
+database/tests/001_constraints.sql:42:  PERFORM pg_temp.ok('Riwayat pengajuan dan versi berkas seed tetap lengkap',(SELECT count(*)=2 FROM pengajuan_laporan WHERE id_laporan_bulanan=-1) AND (SELECT count(*)=2 FROM berkas_keuangan_versi WHERE id_laporan_bulanan=-1));
+database/tests/001_constraints.sql:43:  PERFORM pg_temp.ok('Seed disetujui setelah tiga tahap pada pengajuan kedua',(SELECT status_pengisian='disetujui' AND nomor_pengajuan=2 FROM v_status_laporan WHERE id_laporan_bulanan=-1));
+database/tests/001_constraints.sql:44:  PERFORM pg_temp.ok('Snapshot pertama tidak ditimpa revisi',(SELECT snapshot_laporan->>'ringkasan_refleksi_diri'='Refleksi fiktif awal.' FROM pengajuan_laporan WHERE id_laporan_bulanan=-1 AND nomor_pengajuan=1));
+database/tests/001_constraints.sql:45:  PERFORM pg_temp.ok('Lampiran pengajuan pertama tetap versi pertama',(SELECT id_berkas=-11 FROM pengajuan_berkas WHERE id_laporan_bulanan=-1 AND nomor_pengajuan=1));
+database/tests/001_constraints.sql:48:  PERFORM pg_temp.expect_error('Subclass harus sesuai peran akun',$q$INSERT INTO koordinator_beasiswa(id_koordinator,kode_koordinator,nama_pembina,wilayah_binaan) VALUES(-101,'TEST-KO','Test','Test')$q$,'23503');
+database/tests/001_constraints.sql:51:  PERFORM pg_temp.expect_error('Laporan unik per awardee dan periode','INSERT INTO laporan_bulanan(id_awardee,id_periode_monitoring) VALUES(-101,-1)','23505');
+database/tests/001_constraints.sql:52:  PERFORM pg_temp.expect_error('FK awardee laporan wajib valid','INSERT INTO laporan_bulanan(id_awardee,id_periode_monitoring) VALUES(-999999,-1)','23503');
+database/tests/001_constraints.sql:53:  PERFORM pg_temp.expect_error('Nilai skor harus 1 sampai 5','INSERT INTO laporan_bulanan(id_awardee,id_periode_monitoring,poin_sholat_berjamaah) VALUES(-104,-1,6)','23514');
+database/tests/001_constraints.sql:56:  PERFORM pg_temp.expect_error('Pengajuan lama tidak dapat dihapus','DELETE FROM pengajuan_laporan WHERE id_laporan_bulanan=-1','23514');
+database/tests/001_constraints.sql:57:  PERFORM pg_temp.expect_error('Verifikasi lama tidak dapat ditimpa', $q$UPDATE verifikasi_laporan SET catatan_verifikasi='ubah' WHERE id_laporan_bulanan=-1$q$,'23514');
+database/tests/001_constraints.sql:58:  PERFORM pg_temp.expect_error('Berkas lama tidak dapat ditimpa', $q$UPDATE berkas_keuangan_versi SET nama_asli='baru.pdf' WHERE id_berkas=-11$q$,'23514');
+database/tests/001_constraints.sql:59:  PERFORM pg_temp.expect_error('Laporan terkirim tidak dapat dihapus','DELETE FROM laporan_bulanan WHERE id_laporan_bulanan=-1','23514');
+database/tests/001_constraints.sql:60:  PERFORM pg_temp.expect_error('L
+
+[truncated: omitted lines 237-352 (21095 bytes, bytes 25565-46659)]
+
+tabase/migrations/004_portal_overview.sql:66:  JOIN v_status_laporan s USING(id_laporan_bulanan)
+database/migrations/001_initial.sql:19:  peran text NOT NULL CHECK (peran IN ('awardee','koordinator','laz','kemenag')),
+database/migrations/001_initial.sql:23:  status_aktif boolean NOT NULL DEFAULT true,
+database/migrations/001_initial.sql:42:CREATE TABLE koordinator_beasiswa (
+database/migrations/001_initial.sql:43:  id_koordinator bigint PRIMARY KEY,
+database/migrations/001_initial.sql:44:  peran text NOT NULL DEFAULT 'koordinator' CHECK (peran='koordinator'),
+database/migrations/001_initial.sql:45:  kode_koordinator text NOT NULL UNIQUE,
+database/migrations/001_initial.sql:48:  FOREIGN KEY (id_koordinator,peran) REFERENCES akun_pengguna(id_akun,peran) ON DELETE RESTRICT
+database/migrations/001_initial.sql:74:  id_koordinator bigint NOT NULL REFERENCES koordinator_beasiswa ON DELETE RESTRICT,
+database/migrations/001_initial.sql:84:  status_awardee text NOT NULL DEFAULT 'aktif' CHECK (status_awardee IN ('aktif','evaluasi','nonaktif')),
+database/migrations/001_initial.sql:106:       + (SELECT count(*) FROM koordinator_beasiswa WHERE id_koordinator=a)
+database/migrations/001_initial.sql:116:CREATE CONSTRAINT TRIGGER koordinator_total AFTER DELETE OR UPDATE ON koordinator_beasiswa
+database/migrations/001_initial.sql:117:DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION cek_profil_akun('id_koordinator');
+database/migrations/001_initial.sql:151:  jadwal_tahap text NOT NULL DEFAULT 'koordinator,laz,kemenag',
+database/migrations/001_initial.sql:152:  tanggal_awal_laporan date NOT NULL,
+database/migrations/001_initial.sql:153:  tanggal_akhir_laporan date NOT NULL,
+database/migrations/001_initial.sql:157:  CHECK (tanggal_awal_laporan=make_date(tahun_anggaran,bulan,1)),
+database/migrations/001_initial.sql:158:  CHECK (tanggal_akhir_laporan=(make_date(tahun_anggaran,bulan,1)+interval '1 month - 1 day')::date),
+database/migrations/001_initial.sql:166:  NEW.tanggal_awal_laporan:=make_date(NEW.tahun_anggaran,NEW.bulan,1);
+database/migrations/001_initial.sql:167:  NEW.tanggal_akhir_laporan:=(NEW.tanggal_awal_laporan+interval '1 month - 1 day')::date;
+database/migrations/001_initial.sql:178:                WHEN waktu_sekarang()<tanggal_tenggat_cutoff THEN 'dibuka' ELSE 'ditutup' END AS status_periode
+database/migrations/001_initial.sql:181:CREATE TABLE laporan_bulanan (
+database/migrations/001_initial.sql:182:  id_laporan_bulanan bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+database/migrations/001_initial.sql:186:  id_lpj_keuangan bigint GENERATED BY DEFAULT AS IDENTITY NOT NULL UNIQUE,
+database/migrations/001_initial.sql:202:COMMENT ON COLUMN laporan_bulanan.saldo_awal IS 'Opsional sesuai rancangan awal; tidak diekstrak otomatis dari unggahan.';
+database/migrations/001_initial.sql:205:  id_lpj_keuangan bigint NOT NULL REFERENCES laporan_bulanan(id_lpj_keuangan) ON DELETE CASCADE,
+database/migrations/001_initial.sql:224:CREATE TABLE berkas_keuangan_versi (
+database/migrations/001_initial.sql:226:  id_laporan_bulanan bigint NOT NULL REFERENCES laporan_bulanan ON DELETE RESTRICT,
+database/migrations/001_initial.sql:240:  UNIQUE (id_laporan_bulanan,jenis_dokumen,versi),
+database/migrations/001_initial.sql:241:  UNIQUE (id_berkas,id_laporan_bulanan,jenis_dokumen)
+database/migrations/001_initial.sql:243:CREATE TABLE pengajuan_laporan (
+database/migrations/001_initial.sql:244:  id_laporan_bulanan bigint NOT NULL REFERENCES laporan_bulanan ON DELETE RESTRICT,
+database/migrations/001_initial.sql:248:  snapshot_laporan jsonb NOT NULL CHECK (jsonb_typeof(snapshot_laporan)='object'),
+database/migrations/001_initial.sql:250:  catatan_perbaikan text,
+database/migrations/001_initial.sql:251:  PRIMARY KEY (id_laporan_bulanan,nomor_pengajuan)
+database/migrations/001_initial.sql:254:  id_laporan_bulanan bigint NOT NULL,
+database/migrations/001_initial.sql:258:  PRIMARY KEY (id_laporan_bulanan,nomor_pengajuan,jenis_dokumen),
+database/migrations/001_initial.sql:259:  FOREIGN KEY (id_laporan_bulanan,nomor_pengajuan) REFERENCES pengajuan_laporan ON DELETE RESTRICT,
+database/migrations/001_initial.sql:260:  FOREIGN KEY (id_berkas,id_laporan_bulanan,jenis_dokumen)
+database/migrations/001_initial.sql:261:    REFERENCES berkas_keuangan_versi(id_berkas,id_laporan_bulanan,jenis_dokumen) ON DELETE RESTRICT
+database/migrations/001_initial.sql:263:CREATE TABLE verifikasi_laporan (
+database/migrations/001_initial.sql:264:  id_verifikasi bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+database/migrations/001_initial.sql:265:  id_laporan_bulanan bigint NOT NULL,
+database/migrations/001_initial.sql:267:  tahap_verifikasi text NOT NULL CHECK (tahap_verifikasi IN ('koordinator','laz','kemenag')),
+database/migrations/001_initial.sql:268:  id_koordinator bigint REFERENCES koordinator_beasiswa ON DELETE RESTRICT,
+database/migrations/001_initial.sql:271:  waktu_verifikasi timestamptz NOT NULL DEFAULT waktu_sekarang(),
+database/migrations/001_initial.sql:272:  hasil_verifikasi text NOT NULL CHECK (hasil_verifikasi IN ('disetujui','perlu_revisi')),
+database/migrations/001_initial.sql:273:  catatan_verifikasi text,
+database/migrations/001_initial.sql:274:  CHECK ((tahap_verifikasi='koordinator' AND id_koordinator IS NOT NULL AND id_pengelola_laz IS NULL AND id_pengelola_kemenag IS NULL)
+database/migrations/001_initial.sql:275:    OR (tahap_verifikasi='laz' AND id_koordinator IS NULL AND id_pengelola_laz IS NOT NULL AND id_pengelola_kemenag IS NULL)
+database/migrations/001_initial.sql:276:    OR (tahap_verifikasi='kemenag' AND id_koordinator IS NULL AND id_pengelola_laz IS NULL AND id_pengelola_kemenag IS NOT NULL)),
+database/migrations/001_initial.sql:277:  CHECK (hasil_verifikasi<>'perlu_revisi' OR coalesce(btrim(catatan_verifikasi),'')<>''),
+database/migrations/001_initial.sql:278:  UNIQUE (id_laporan_bulanan,nomor_pengajuan,tahap_verifikasi),
+database/migrations/001_initial.sql:279:  FOREIGN KEY (id_laporan_bulanan,nomor_pengajuan) REFERENCES pengajuan_laporan ON DELETE RESTRICT
+database/migrations/001_initial.sql:281:CREATE VIEW v_status_laporan AS
+database/migrations/001_initial.sql:282:SELECT l.id_laporan_bulanan, coalesce(p.nomor_pengajuan,0) AS nomor_pengajuan,
+database/migrations/001_initial.sql:284:  EXISTS (SELECT 1 FROM pengajuan_laporan s WHERE s.id_laporan_bulanan=l.id_laporan_bulanan) AS kewajiban_pengumpulan_terpenuhi,
+database/migrations/001_initial.sql:286:    WHEN EXISTS (SELECT 1 FROM verifikasi_laporan v WHERE v.id_laporan_bulanan=l.id_laporan_bulanan AND v.nomor_pengajuan=p.nomor_pengajuan AND v.hasil_verifikasi='perlu_revisi') THEN 'perlu_revisi'
+database/migrations/001_initial.sql:287:    WHEN (SELECT count(*) FROM verifikasi_laporan v WHERE v.id_laporan_bulanan=l.id_laporan_bulanan AND v.nomor_pengajuan=p.nomor_pengajuan AND v.hasil_verifikasi='disetujui')=3 THEN 'disetujui'
+database/migrations/001_initial.sql:288:    ELSE 'diajukan' END AS status_pengisian
+database/migrations/001_initial.sql:289:FROM laporan_bulanan l
+database/migrations/001_initial.sql:290:LEFT JOIN LATERAL (SELECT * FROM pengajuan_laporan s WHERE s.id_laporan_bulanan=l.id_laporan_bulanan ORDER BY nomor_pengajuan DESC LIMIT 1) p ON true;
+database/migrations/001_initial.sql:292:CREATE FUNCTION laporan_bisa_diubah(p_id bigint) RETURNS boolean
+database/migrations/001_initial.sql:294:SELECT coalesce((SELECT status_pengisian IN ('draf','perlu_revisi') FROM v_status_laporan WHERE id_laporan_bulanan=p_id),false)
+database/migrations/001_initial.sql:296:CREATE FUNCTION jaga_laporan() RETURNS trigger
+database/migrations/001_initial.sql:300:    IF (NEW.id_laporan_bulanan,NEW.id_awardee,NEW.id_periode_monitoring,NEW.id_evaluasi_progres,NEW.id_lpj_keuangan,NEW.dibuat_pada)
+database/migrations/001_initial.sql:301:      IS DISTINCT FROM (OLD.id_laporan_bulanan,OLD.id_awardee,OLD.id_periode_monitoring,OLD.id_evaluasi_progres,OLD.id_lpj_keuangan,OLD.dibuat_pada) THEN
+database/migrations/001_initial.sql:302:      RAISE EXCEPTION 'Identitas laporan tidak dapat dipindahkan' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:303:    IF NOT laporan_bisa_diubah(OLD.id_laporan_bulanan) THEN
+database/migrations/001_initial.sql:304:      RAISE EXCEPTION 'Laporan terkirim hanya bisa diubah setelah diminta revisi' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:307:  IF EXISTS (SELECT 1 FROM pengajuan_laporan WHERE id_laporan_bulanan=OLD.id_laporan_bulanan) THEN
+database/migrations/001_initial.sql:308:    RAISE EXCEPTION 'Laporan yang pernah diajukan tidak boleh dihapus' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:311:CREATE TRIGGER laporan_terjaga BEFORE UPDATE OR DELETE ON laporan_bulanan FOR EACH ROW EXECUTE FUNCTION jaga_laporan();
+database/migrations/001_initial.sql:313:CREATE FUNCTION siapkan_berkas_keuangan() RETURNS trigger
+database/migrations/001_initial.sql:317:  SELECT id_awardee INTO pemilik FROM laporan_bulanan WHERE id_laporan_bulanan=NEW.id_laporan_bulanan FOR UPDATE;
+database/migrations/001_initial.sql:318:  IF NOT FOUND THEN RAISE EXCEPTION 'Laporan tidak ada' USING ERRCODE='23503'; END IF;
+database/migrations/001_initial.sql:319:  IF pemilik<>NEW.diunggah_oleh OR NOT laporan_bisa_diubah(NEW.id_laporan_bulanan) THEN
+database/migrations/001_initial.sql:320:    RAISE EXCEPTION 'Pemilik/status laporan tidak mengizinkan unggahan' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:321:  SELECT coalesce(max(versi),0)+1 INTO NEW.versi FROM berkas_keuangan_versi
+database/migrations/001_initial.sql:322:    WHERE id_laporan_bulanan=NEW.id_laporan_bulanan AND jenis_dokumen=NEW.jenis_dokumen;
+database/migrations/001_initial.sql:326:CREATE TRIGGER berkas_nomor BEFORE INSERT ON berkas_keuangan_versi FOR EACH ROW EXECUTE FUNCTION siapkan_berkas_keuangan();
+database/migrations/001_initial.sql:327:CREATE TRIGGER berkas_tetap BEFORE UPDATE OR DELETE ON berkas_keuangan_versi FOR EACH ROW EXECUTE FUNCTION tolak_perubahan();
+database/migrations/001_initial.sql:331:DECLARE l laporan_bulanan; p periode_monitoring; a awardee; s v_status_laporan; w timestamptz;
+database/migrations/001_initial.sql:333:  SELECT * INTO l FROM laporan_bulanan WHERE id_laporan_bulanan=NEW.id_laporan_bulanan FOR UPDATE;
+database/migrations/001_initial.sql:334:  IF NOT FOUND THEN RAISE EXCEPTION 'Laporan tidak ada' USING ERRCODE='23503'; END IF;
+database/migrations/001_initial.sql:335:  SELECT * INTO s FROM v_status_laporan WHERE id_laporan_bulanan=l.id_laporan_bulanan;
+database/migrations/001_initial.sql:340:  IF NOT EXISTS (SELECT 1 FROM akun_pengguna WHERE id_akun=l.id_awardee AND status_aktif) THEN
+database/migrations/001_initial.sql:345:  ELSIF s.status_pengisian<>'perlu_revisi' THEN
+database/migrations/001_initial.sql:346:    RAISE EXCEPTION 'Pengajuan ulang membutuhkan permintaan revisi' USING ERRCODE='23514';
+database/migrations/001_initial.sql:347:  ELSIF coalesce(btrim(NEW.catatan_perbaikan),'')='' THEN
+database/migrations/001_initial.sql:348:    RAISE EXCEPTION 'Catatan perbaikan wajib diisi' USING ERRCODE='23514';
+database/migrations/001_initial.sql:353:    RAISE EXCEPTION 'Evaluasi dan ringkasan laporan belum lengkap' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:354:  IF NOT EXISTS (SELECT 1 FROM berkas_keuangan_versi WHERE id_laporan_bulanan=l.id_laporan_bulanan AND jenis_dokumen='periode_berjalan') THEN
+database/migrations/001_initial.sql:355:    RAISE EXCEPTION 'Berkas keuangan periode berjalan wajib dilampirkan' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:358:  NEW.snapshot_laporan:=to_jsonb(l) || jsonb_build_object(
+database/migrations/001_initial.sql:359:    'realisasi_pengeluaran',(SELECT coalesce(jsonb_agg(to_jsonb(r) ORDER BY id_realisasi_pengeluaran),'[]') FROM realisasi_pengeluaran r WHERE r.id_lpj_keuangan=l.id_lpj_keuangan),
+database/migrations/001_initial.sql:364:CREATE TRIGGER pengajuan_siapan BEFORE INSERT ON pengajuan_laporan FOR EACH ROW EXECUTE FUNCTION siapkan_pengajuan();
+database/migrations/001_initial.sql:368:  INSERT INTO pengajuan_berkas(id_laporan_bulanan,nomor_pengajuan,jenis_dokumen,id_berkas)
+database/migrations/001_initial.sql:369:  SELECT DISTINCT ON (jenis_dokumen) NEW.id_laporan_bulanan,NEW.nomor_pengajuan,jenis_dokumen,id_berkas
+database/migrations/001_initial.sql:370:    FROM berkas_keuangan_versi WHERE id_laporan_bulanan=NEW.id_laporan_bulanan ORDER BY jenis_dokumen,versi DESC;
+database/migrations/001_initial.sql:373:CREATE TRIGGER pengajuan_lampiran AFTER INSERT ON pengajuan_laporan FOR EACH ROW EXECUTE FUNCTION tautkan_berkas_pengajuan();
+database/migrations/001_initial.sql:380:CREATE TRIGGER pengajuan_tetap BEFORE UPDATE OR DELETE ON pengajuan_laporan FOR EACH ROW EXECUTE FUNCTION tolak_perubahan();
+database/migrations/001_initial.sql:383:CREATE FUNCTION cek_verifikasi_laporan() RETURNS trigger
+database/migrations/001_initial.sql:385:DECLARE l laporan_bulanan; a awardee; s v_status_laporan; pelaksana bigint; tahap_sebelum text;
+database/migrations/001_initial.sql:387:  SELECT * INTO l FROM laporan_bulanan WHERE id_laporan_bulanan=NEW.id_laporan_bulanan FOR UPDATE;
+database/migrations/001_initial.sql:388:  IF NOT FOUND THEN RAISE EXCEPTION 'Laporan tidak ada' USING ERRCODE='23503'; END IF;
+database/migrations/001_initial.sql:390:  SELECT * INTO s FROM v_status_laporan WHERE id_laporan_bulanan=l.id_laporan_bulanan;
+database/migrations/001_initial.sql:391:  IF NEW.nomor_pengajuan<>s.nomor_pengajuan OR s.status_pengisian<>'diajukan' THEN
+database/migrations/001_initial.sql:392:    RAISE EXCEPTION 'Hanya pengajuan terbaru yang menunggu pemeriksaan dapat diverifikasi' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:393:  pelaksana:=coalesce(NEW.id_koordinator,NEW.id_pengelola_laz,NEW.id_pengelola_kemenag);
+database/migrations/001_initial.sql:394:  IF NOT EXISTS (SELECT 1 FROM akun_pengguna WHERE id_akun=pelaksana AND status_aktif AND peran=NEW.tahap_verifikasi) THEN
+database/migrations/001_initial.sql:396:  IF NEW.tahap_verifikasi='koordinator' AND NEW.id_koordinator IS DISTINCT FROM a.id_koordinator THEN
+database/migrations/001_initial.sql:397:    RAISE EXCEPTION 'Awardee bukan binaan koordinator' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:398:  IF NEW.tahap_verifikasi='laz' AND NOT EXISTS (SELECT 1 FROM pengelola_lembaga_zakat WHERE id_pengelola_laz=NEW.id_pengelola_laz AND id_lembaga=a.id_lembaga) THEN
+database/migrations/001_initial.sql:400:  tahap_sebelum:=CASE NEW.tahap_verifikasi WHEN 'laz' THEN 'koordinator' WHEN 'kemenag' THEN 'laz' END;
+database/migrations/001_initial.sql:401:  IF tahap_sebelum IS NOT NULL AND NOT EXISTS (SELECT 1 FROM verifikasi_laporan WHERE id_laporan_bulanan=l.id_laporan_bulanan AND nomor_pengajuan=NEW.nomor_pengajuan AND tahap_verifikasi=tahap_sebelum AND hasil_verifikasi='disetujui') THEN
+database/migrations/001_initial.sql:403:  NEW.waktu_verifikasi:=waktu_sekarang();
+database/migrations/001_initial.sql:406:CREATE TRIGGER verifikasi_valid BEFORE INSERT ON verifikasi_laporan FOR EACH ROW EXECUTE FUNCTION cek_verifikasi_laporan();
+database/migrations/001_initial.sql:407:CREATE TRIGGER verifikasi_tetap BEFORE UPDATE OR DELETE ON verifikasi_laporan FOR EACH ROW EXECUTE FUNCTION tolak_perubahan();
+database/migrations/001_initial.sql:409:-- Entri pengeluaran manual juga mengikuti kunci laporan; jangan mengubah FK
+database/migrations/001_initial.sql:410:-- untuk memindahkan detail dari laporan terkirim ke draf.
+database/migrations/001_initial.sql:415:  lpj:=CASE WHEN TG_OP='DELETE' THEN OLD.id_lpj_keuangan ELSE NEW.id_lpj_keuangan END;
+database/migrations/001_initial.sql:416:  IF TG_OP='UPDATE' AND NEW.id_lpj_keuangan<>OLD.id_lpj_keuangan THEN
+database/migrations/001_initial.sql:418:  SELECT id_laporan_bulanan INTO lap FROM laporan_bulanan WHERE id_lpj_keuangan=lpj FOR UPDATE;
+database/migrations/001_initial.sql:419:  IF lap IS NOT NULL AND NOT laporan_bisa_diubah(lap) THEN RAISE EXCEPTION 'Laporan terkunci' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:445:CREATE TABLE verifikasi_akademik (
+database/migrations/001_initial.sql:446:  id_verifikasi_akademik bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+database/migrations/001_initial.sql:448:  id_koordinator bigint NOT NULL REFERENCES koordinator_beasiswa ON DELETE RESTRICT,
+database/migrations/001_initial.sql:449:  hasil_verifikasi text NOT NULL CHECK (hasil_verifikasi IN ('terverifikasi','perlu_revisi')),
+database/migrations/001_initial.sql:450:  catatan_pembinaan text,
+database/migrations/001_initial.sql:451:  waktu_verifikasi timestamptz NOT NULL DEFAULT waktu_sekarang(),
+database/migrations/001_initial.sql:452:  CHECK (hasil_verifikasi<>'perlu_revisi' OR coalesce(btrim(catatan_pembinaan),'')<>'')
+database/migrations/001_initial.sql:454:CREATE TABLE riwayat_status_beasiswa (
+database/migrations/001_initial.sql:455:  id_riwayat_status bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+database/migrations/001_initial.sql:457:  status_sebelum text NOT NULL CHECK (status_sebelum IN ('aktif','evaluasi','nonaktif')),
+database/migrations/001_initial.sql:458:  status_sesudah text NOT NULL CHECK (status_sesudah IN ('aktif','evaluasi','nonaktif')),
+database/migrations/001_initial.sql:459:  id_verifikasi_akademik bigint NOT NULL REFERENCES verifikasi_akademik ON DELETE RESTRICT,
+database/migrations/001_initial.sql:462:  CHECK (status_sebelum<>status_sesudah)
+database/migrations/001_initial.sql:464:CREATE VIEW v_akademik_terverifikasi AS
+database/migrations/001_initial.sql:466:       v.id_verifikasi_akademik,v.waktu_verifikasi,v.catatan_pembinaan,
+database/migrations/001_initial.sql:467:       CASE WHEN a.ips<3.00 THEN 'peringatan_ips' ELSE 'memenuhi' END AS status_evaluasi_ips
+database/migrations/001_initial.sql:469:JOIN LATERAL (SELECT a.* FROM versi_akademik a JOIN verifikasi_akademik v USING(id_versi_akademik)
+database/migrations/001_initial.sql:470:  WHERE a.id_riwayat_akademik=r.id_riwayat_akademik AND v.hasil_verifikasi='terverifikasi'
+database/migrations/001_initial.sql:472:JOIN verifikasi_akademik v USING(id_versi_akademik);
+database/migrations/001_initial.sql:480:  IF NEW.diajukan_oleh<>pemilik OR NOT EXISTS (SELECT 1 FROM akun_pengguna WHERE id_akun=pemilik AND status_aktif) THEN
+database/migrations/001_initial.sql:489:CREATE FUNCTION cek_verifikasi_akademik() RETURNS trigger
+database/migrations/001_initial.sql:499:    RAISE EXCEPTION 'Verifikasi harus memakai versi akademik terbaru' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:500:  IF NEW.id_koordinator<>a.id_koordinator OR NOT EXISTS (SELECT 1 FROM akun_pengguna WHERE id_akun=NEW.id_koordinator AND status_aktif) THEN
+database/migrations/001_initial.sql:501:    RAISE EXCEPTION 'Koordinator akademik tidak berwenang' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:502:  NEW.waktu_verifikasi:=waktu_sekarang();
+database/migrations/001_initial.sql:505:CREATE TRIGGER akademik_verifikasi BEFORE INSERT ON verifikasi_akademik FOR EACH ROW EXECUTE FUNCTION cek_verifikasi_akademik();
+database/migrations/001_initial.sql:506:CREATE TRIGGER akademik_verifikasi_tetap BEFORE UPDATE OR DELETE ON verifikasi_akademik FOR EACH ROW EXECUTE FUNCTION tolak_perubahan();
+database/migrations/001_initial.sql:507:CREATE TRIGGER status_riwayat_tetap BEFORE UPDATE OR DELETE ON riwayat_status_beasiswa FOR EACH ROW EXECUTE FUNCTION tolak_perubahan();
+database/migrations/001_initial.sql:512:  IF NEW.hasil_verifikasi<>'terverifikasi' THEN RETURN NULL; END IF;
+database/migrations/001_initial.sql:514:  SELECT status_awardee INTO lama FROM awardee WHERE id_awardee=pemilik FOR UPDATE;
+database/migrations/001_initial.sql:516:  IF EXISTS (SELECT 1 FROM v_akademik_terverifikasi a JOIN v_akademik_terverifikasi b
+database/migrations/001_initial.sql:519:  ELSIF lama='aktif' AND EXISTS (SELECT 1 FROM v_akademik_terverifikasi WHERE id_awardee=pemilik AND ips<3.00) THEN baru:='evaluasi';
+database/migrations/001_initial.sql:522:    UPDATE awardee SET status_awardee=baru WHERE id_awardee=pemilik;
+database/migrations/001_initial.sql:523:    INSERT INTO riwayat_status_beasiswa(id_awardee,status_sebelum,status_sesudah,id_verifikasi_akademik,alasan)
+database/migrations/001_initial.sql:524:    VALUES(pemilik,lama,baru,NEW.id_verifikasi_akademik,
+database/migrations/001_initial.sql:525:      CASE WHEN baru='nonaktif' THEN 'Dua semester berturut-turut memiliki IPS terverifikasi di bawah 3,00' ELSE 'IPS terverifikasi di bawah 3,00' END);
+database/migrations/001_initial.sql:529:CREATE TRIGGER akademik_evaluasi AFTER INSERT ON verifikasi_akademik FOR EACH ROW EXECUTE FUNCTION evaluasi_beasiswa();
+database/migrations/001_initial.sql:530:CREATE FUNCTION jaga_status_awardee() RETURNS trigger LANGUAGE plpgsql AS $$
+database/migrations/001_initial.sql:532:  IF TG_OP='INSERT' AND NEW.status_awardee<>'aktif' THEN
+database/migrations/001_initial.sql:533:    RAISE EXCEPTION 'Status awal beasiswa harus aktif' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:534:  IF TG_OP='UPDATE' AND NEW.status_awardee<>OLD.status_awardee AND pg_trigger_depth()<2 THEN
+database/migrations/001_initial.sql:535:    RAISE EXCEPTION 'Status beasiswa dikelola oleh hasil verifikasi akademik' USING ERRCODE='23514'; END IF;
+database/migrations/001_initial.sql:538:CREATE TRIGGER status_awardee_terjaga BEFORE INSERT OR UPDATE ON awardee FOR EACH ROW EXECUTE FUNCTION jaga_status_awardee();
+database/migrations/001_initial.sql:542:CREATE INDEX awardee_koordinator_idx ON awardee(id_koordinator);
+database/migrations/001_initial.sql:545:CREATE INDEX laporan_periode_idx ON laporan_bulanan(id_periode_monitoring);
+database/migrations/001_initial.sql:546:CREATE INDEX realisasi_lpj_idx ON realisasi_pengeluaran(id_lpj_keuangan);
+database/migrations/001_initial.sql:549:CREATE INDEX status_awardee_idx ON riwayat_status_beasiswa(id_awardee,waktu_perubahan);
+database/migrations/003_portal_drafts.sql:1:-- Tambahan API draf. Rancangan laporan dan semua riwayat tetap dipakai.
+database/migrations/003_portal_drafts.sql:9:ALTER TABLE laporan_bulanan ADD COLUMN versi_draf integer NOT NULL DEFAULT 0 CHECK(versi_draf>=0),
+database/migrations/003_portal_drafts.sql:13: SELECT a.id_akun::text, a.id_beasiswa, a.peran, a.password_hash, a.status_aktif,
+database/migrations/003_portal_drafts.sql:16: LEFT JOIN koordinator_beasiswa k ON k.id_koordinator=a.id_akun
+database/migrations/003_portal_drafts.sql:23: IF NOT EXISTS(SELECT 1 FROM akun_pengguna WHERE id_akun=p_aktor AND peran='awardee' AND status_aktif) THEN
+database/migrations/003_portal_drafts.sql:26:   'periodId',p.id_periode_monitoring::text,'reportId',l.id_laporan_bulanan::text,
+database/migrations/003_portal_drafts.sql:27:   'month',p.bulan,'year',p.tahun_anggaran,'status',coalesce(s.status_pengisian,'draf'),
+database/migrations/003_portal_drafts.sql:34: FROM periode_monitoring p LEFT JOIN laporan_bulanan l
+database/migrations/003_portal_drafts.sql:36: LEFT JOIN v_status_laporan s ON s.id_laporan_bulanan=l.id_laporan_bulanan
+database/migrations/003_portal_drafts.sql:37: WHERE l.id_laporan_bulanan IS NOT NULL OR
+database/migrations/003_portal_drafts.sql:43:DECLARE laporan laporan_bulanan; periode periode_monitoring; hasil jsonb;
+database/migrations/003_portal_drafts.sql:45: IF NOT EXISTS(SELECT 1 FROM akun_pengguna WHERE id_akun=p_aktor AND peran='awardee' AND status_aktif) THEN
+database/migrations/003_portal_drafts.sql:53: SELECT * INTO laporan FROM laporan_bulanan
+database/migrations/003_portal_drafts.sql:58:   INSERT INTO laporan_bulanan(id_awardee,id_periode_monitoring) VALUES(p_aktor,p_periode)
+database/migrations/003_portal_drafts.sql:60:   SELECT * INTO laporan FROM laporan_bulanan
+database/migrations/003_portal_drafts.sql:63: IF laporan.versi_draf<>p_versi THEN RAISE EXCEPTION 'Draf berubah pada sesi lain' USING ERRCODE='40001'; END IF;
+database/migrations/003_portal_drafts.sql:64: IF NOT laporan_bisa_diubah(laporan.id_laporan_bulanan) THEN
+database/migrations/003_portal_drafts.sql:65:   RAISE EXCEPTION 'Laporan terkirim terkunci' USING ERRCODE='23514'; END IF;
+database/migrations/003_portal_drafts.sql:66: UPDATE laporan_bulanan SET jawaban_tambahan=jsonb_set(jawaban_tambahan,'{portal}',
+database/migrations/003_portal_drafts.sql:70: WHERE id_laporan_bulanan=laporan.id_laporan_bulanan;
+database/migrations/003_portal_drafts.sql:91:COMMENT ON FUNCTION portal_simpan_draf IS 'ID aktor wajib berasal dari sesi backend, bukan request browser. Perubahan draf tidak menandai laporan diajukan.';
+database/migrations/005_clear_draft.sql:16:  laporan laporan_bulanan;
+database/migrations/005_clear_draft.sql:21:                 WHERE id_akun = p_aktor AND peran = 'awardee' AND status_aktif) THEN
+database/migrations/005_clear_draft.sql:29:  SELECT * INTO laporan FROM laporan_bulanan
+database/migrations/005_clear_draft.sql:34:    INSERT INTO laporan_bulanan(id_awardee, id_periode_monitoring) VALUES (p_aktor, p_periode)
+database/migrations/005_clear_draft.sql:36:    SELECT * INTO STRICT laporan FROM laporan_bulanan
+database/migrations/005_clear_draft.sql:40:    SELECT 1 FROM pengajuan_laporan WHERE id_laporan_bulanan = laporan.id_laporan_bulanan
+database/migrations/005_clear_draft.sql:44:  IF laporan.versi_draf IS DISTINCT FROM p_versi THEN
+database/migrations/005_clear_draft.sql:47:  UPDATE laporan_bulanan SET
+database/migrations/005_clear_draft.sql:50:    WHERE id_laporan_bulanan = laporan.id_laporan_bulanan;
+
+--- stderr ---
+
+
+Use `read` on the stdout/stderr paths above for the full output.
