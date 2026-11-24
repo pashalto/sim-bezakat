@@ -23,7 +23,11 @@ export function sameOrigin(request:Request){
  const url=new URL(request.url)
  const host=request.headers.get('host')
  const expected=host?`${url.protocol}//${host}`:url.origin
- if(origin!==expected) throw new PortalError(403,'Permintaan harus berasal dari website ini.')
+ const allowed=new Set([url.origin,expected])
+ if(process.env.FIGMA==='1' && process.env.FIGMA_PUBLIC_URL){
+  try{allowed.add(new URL(process.env.FIGMA_PUBLIC_URL).origin)}catch{}
+ }
+ if(!origin||!allowed.has(origin)) throw new PortalError(403,'Permintaan harus berasal dari website ini.')
 }
 export async function body(request:Request){
  if(!request.headers.get('content-type')?.startsWith('application/json')) throw new PortalError(415,'Gunakan JSON.')
