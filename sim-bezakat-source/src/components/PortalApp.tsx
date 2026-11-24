@@ -3689,6 +3689,9 @@ function StaffPeriodDetail({
   const [reason, setReason] = useState('')
   const [financeReview, setFinanceReview] = useState<string | null>(null)
   const [savingReview, setSavingReview] = useState('')
+  const [bulkRejectOpen, setBulkRejectOpen] = useState(false)
+  const [bulkRejectReason, setBulkRejectReason] = useState('')
+  const [finalDraftDecision, setFinalDraftDecision] = useState<'approved' | 'rejected' | null>(null)
   const hasFinalDecision = ['revision', 'approved', 'rejected'].includes(period.reportStatus)
   const [editingReview, setEditingReview] = useState(!hasFinalDecision)
   const [draftSectionReviews, setDraftSectionReviews] = useState<Record<string, PeriodRecord['sectionReviews'][string]>>(
@@ -3708,6 +3711,7 @@ function StaffPeriodDetail({
     reviewedFinance === period.financeDocuments.length
 
   const approveSection = async (sectionKey: string) => {
+    setFinalDraftDecision(null)
     setDraftSectionReviews(current => ({
       ...current,
       [sectionKey]: { status: 'approved', issues: [] },
@@ -3721,6 +3725,7 @@ function StaffPeriodDetail({
       onToast('Pilih minimal satu isian dan tulis alasan perbaikan.')
       return
     }
+    setFinalDraftDecision(null)
     setDraftSectionReviews(current => ({
       ...current,
       [sectionKey]: {
@@ -3743,12 +3748,51 @@ function StaffPeriodDetail({
       onToast('Pilih alasan perbaikan dokumen.')
       return
     }
+    setFinalDraftDecision(null)
     setDraftFinanceReviews(current => ({
       ...current,
       [document.id]: { status, reason: status === 'revision' ? selectedReason : undefined },
     }))
     setFinanceReview(null)
     onToast('Keputusan dokumen disimpan sementara.')
+  }
+
+  const approveAll = () => {
+    setEditingReview(true)
+    setBulkRejectOpen(false)
+    setFinalDraftDecision('approved')
+    setDraftSectionReviews(Object.fromEntries(reportSections.map(section => [
+      section.key,
+      { status: 'approved' as ReviewStatus, issues: [] },
+    ])))
+    setDraftFinanceReviews(Object.fromEntries(period.financeDocuments.map(document => [
+      document.id,
+      { status: 'approved' as ReviewStatus },
+    ])))
+    onToast('Semua bagian dan dokumen ditandai disetujui dalam draft. Tekan Kirim Semua Hasil Pemeriksaan untuk mengirim.')
+  }
+
+  const rejectAll = () => {
+    if (!bulkRejectReason.trim()) {
+      onToast('Tulis alasan penolakan terlebih dahulu.')
+      return
+    }
+    const rejectionReason = bulkRejectReason.trim()
+    setEditingReview(true)
+    setFinalDraftDecision('rejected')
+    setDraftSectionReviews(Object.fromEntries(reportSections.map(section => [
+      section.key,
+      {
+        status: 'revision' as ReviewStatus,
+        issues: section.questions.map(question => ({ questionId: question.id, reason: rejectionReason })),
+      },
+    ])))
+    setDraftFinanceReviews(Object.fromEntries(period.financeDocuments.map(document => [
+      document.id,
+      { status: 'revision' as ReviewStatus, reason: rejectionReason },
+    ])))
+    setBulkRejectOpen(false)
+    onToast('Semua bagian ditandai ditolak dalam draft. Tekan Kirim Semua Hasil Pemeriksaan untuk mengirim.')
   }
 
   const submitAllReviews = async () => {
@@ -3778,7 +3822,14 @@ function StaffPeriodDetail({
     })
     const revisionCount = Object.values(draftSectionReviews).filter(review => review.status === 'revision').length +
       Object.values(draftFinanceReviews).filter(review => review.status === 'revision').length
-    const finalAction: ReportReviewInput = revisionCount
+    const finalAction: ReportReviewInput = finalDraftDecision === 'rejected'
+      ? {
+          reportId: period.reportId ?? period.id,
+          operation: 'reject-report',
+          target: 'report',
+          issues: [{ questionId: 'report', reason: bulkRejectReason.trim() || 'Laporan ditolak oleh koordinator.' }],
+        }
+      : revisionCount
       ? {
           reportId: period.reportId ?? period.id,
           operation: 'revise-report',
@@ -3797,7 +3848,7 @@ function StaffPeriodDetail({
       } else {
         updatePeriod({
           ...period,
-          reportStatus: revisionCount ? 'revision' : 'approved',
+          reportStatus: finalDraftDecision === 'rejected' ? 'rejected' : revisionCount ? 'revision' : 'approved',
           sectionReviews: draftSectionReviews,
           financeDocuments: period.financeDocuments.map(document => ({
             ...document,
@@ -3806,14 +3857,18 @@ function StaffPeriodDetail({
           reviewHistory: [...period.reviewHistory, {
             date: new Date().toISOString(),
             actor: account.name,
-            text: revisionCount
+            text: finalDraftDecision === 'rejected'
+              ? `Hasil pemeriksaan dikirim: laporan ditolak (${bulkRejectReason.trim()}).`
+              : revisionCount
               ? `Hasil pemeriksaan dikirim: ${revisionCount} bagian atau dokumen perlu diperbaiki.`
               : 'Hasil pemeriksaan dikirim: seluruh bagian dan dokumen disetujui.',
           }],
         })
       }
       setEditingReview(false)
-      onToast(revisionCount
+      onToast(finalDraftDecision === 'rejected'
+        ? 'Penolakan seluruh laporan berhasil dikirim.'
+        : revisionCount
         ? 'Seluruh hasil pemeriksaan dikirim sekaligus ke awardee.'
         : 'Laporan diterima setelah seluruh bagian selesai diperiksa.')
     } catch (error) {
@@ -3862,6 +3917,29 @@ function StaffPeriodDetail({
                 {editingReview ? 'Selesai Edit' : 'Edit Pemeriksaan'}
               </button>
             )}
+            {canReview && (
+              <>
+                <button
+                  disabled={!!savingReview}
+                  onClick={approveAll}
+                  className="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-[10px] font-extrabold text-white shadow-sm disabled:bg-slate-300"
+                >
+                  <Icon name="check" className="h-4 w-4" />
+                  Setujui Semua
+                </button>
+                <button
+                  disabled={!!savingReview}
+                  onClick={() => {
+                    setEditingReview(true)
+                    setBulkRejectOpen(current => !current)
+                  }}
+                  className="flex items-center gap-2 rounded-xl bg-rose-700 px-4 py-2.5 text-[10px] font-extrabold text-white shadow-sm disabled:bg-slate-300"
+                >
+                  <Icon name="close" className="h-4 w-4" />
+                  Tolak Semua
+                </button>
+              </>
+            )}
             <button
               onClick={() => exportPeriodPdf(period, profile, onToast)}
               className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-[10px] font-extrabold text-emerald-800 shadow-sm"
@@ -3873,6 +3951,38 @@ function StaffPeriodDetail({
           </div>
         }
       />
+      {canReview && bulkRejectOpen && (
+        <section className="mb-6 rounded-2xl border border-rose-300 bg-rose-50 p-5 shadow-sm">
+          <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-rose-700">
+            Konfirmasi tolak semua
+          </p>
+          <h2 className="mt-1 text-base font-extrabold text-rose-950">Tulis alasan penolakan laporan</h2>
+          <p className="mt-1 text-[10px] leading-5 text-rose-800">
+            Alasan ini akan diterapkan ke seluruh bagian dan dokumen. Hasil masih berupa draft sampai dikirim.
+          </p>
+          <textarea
+            value={bulkRejectReason}
+            onChange={event => setBulkRejectReason(event.target.value)}
+            maxLength={500}
+            placeholder="Contoh: Data laporan tidak dapat diverifikasi dan harus diajukan ulang..."
+            className="mt-4 min-h-24 w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-xs outline-none focus:border-rose-500"
+          />
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              onClick={rejectAll}
+              className="rounded-lg bg-rose-700 px-4 py-2.5 text-[10px] font-extrabold text-white"
+            >
+              Terapkan Tolak Semua
+            </button>
+            <button
+              onClick={() => setBulkRejectOpen(false)}
+              className="rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-[10px] font-extrabold text-rose-700"
+            >
+              Batal
+            </button>
+          </div>
+        </section>
+      )}
       {readOnly && (
         <div className={`mb-6 flex items-center gap-3 rounded-xl border p-4 text-xs font-semibold ${
           canReview ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-slate-200 bg-white text-slate-600'
