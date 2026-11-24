@@ -3257,7 +3257,8 @@ function StaffDashboard({
     (period) => period.reportStatus === 'submitted' || financeStatus(period) === 'submitted',
   ).length
   const revisions = periods.filter(
-    (period) => period.reportStatus === 'revision' || financeStatus(period) === 'revision',
+    (period) => ['revision', 'rejected'].includes(period.reportStatus) ||
+      ['revision', 'rejected'].includes(financeStatus(period)),
   ).length
   const approved = periods.filter((period) => overallStatus(period) === 'approved').length
   return (
@@ -3288,7 +3289,7 @@ function StaffDashboard({
         />
         <DashboardStat
           icon="alert"
-          label="Perlu perbaikan"
+          label="Perlu tindak lanjut"
           value={String(revisions)}
           note="Periode"
           tone="rose"
@@ -3534,6 +3535,7 @@ function StaffPeriodDetail({
   const [reason, setReason] = useState('')
   const [financeReview, setFinanceReview] = useState<string | null>(null)
   const [savingReview, setSavingReview] = useState('')
+  const [decisionNote, setDecisionNote] = useState('')
   const readOnly = account.role !== 'coordinator' || !['submitted', 'review'].includes(period.reportStatus)
 
   const saveConnectedReview = async (input: Omit<ReportReviewInput, 'reportId'>, success: string) => {
@@ -3556,6 +3558,52 @@ function StaffPeriodDetail({
       setSavingReview('')
     }
     return true
+  }
+
+  const decideReport = async (decision: 'approved' | 'revision' | 'rejected') => {
+    if (decision !== 'approved' && !decisionNote.trim()) {
+      onToast('Catatan wajib diisi untuk revisi atau penolakan.')
+      return
+    }
+    const operation = decision === 'approved'
+      ? 'approve-report'
+      : decision === 'revision' ? 'revise-report' : 'reject-report'
+    const success = decision === 'approved'
+      ? 'Laporan diterima.'
+      : decision === 'revision' ? 'Laporan dikembalikan untuk direvisi.' : 'Laporan ditolak.'
+    if (await saveConnectedReview({
+      operation,
+      target: 'report',
+      issues: decision === 'approved' ? undefined : [{ questionId: 'report', reason: decisionNote.trim() }],
+    }, success)) return
+    const now = new Date().toISOString()
+    const nextReviews = decision === 'approved'
+      ? Object.fromEntries(reportSections.map(section => [section.key, { status: 'approved' as ReviewStatus, issues: [] }]))
+      : decision === 'revision'
+        ? {
+            ...period.sectionReviews,
+            ringkasan: {
+              status: 'revision' as ReviewStatus,
+              issues: [{ questionId: 'executive_summary', reason: decisionNote.trim() }],
+            },
+          }
+        : period.sectionReviews
+    updatePeriod({
+      ...period,
+      reportStatus: decision,
+      sectionReviews: nextReviews,
+      financeDocuments: decision === 'approved'
+        ? period.financeDocuments.map(document => ({ ...document, status: 'approved' }))
+        : period.financeDocuments,
+      reviewHistory: [...period.reviewHistory, {
+        date: now,
+        actor: account.name,
+        text: decision === 'approved' ? 'Laporan diterima oleh koordinator.' :
+          `${decision === 'revision' ? 'Laporan perlu direvisi' : 'Laporan ditolak'}: ${decisionNote.trim()}`,
+      }],
+    })
+    setDecisionNote('')
+    onToast(success)
   }
 
   const approveSection = async (sectionKey: string) => {
@@ -3695,6 +3743,42 @@ function StaffPeriodDetail({
           <Icon name="eye" className="h-4 w-4 text-emerald-700" />
           Akses akun ini bersifat hanya-baca.
         </div>
+      )}
+      {!readOnly && (
+        <section className="mb-6 rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+            <div className="flex-1">
+              <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-emerald-700">
+                Keputusan laporan
+              </p>
+              <h2 className="mt-1 text-base font-extrabold">Tentukan hasil pemeriksaan</h2>
+              <p className="mt-1 text-[10px] text-slate-500">
+                Catatan wajib untuk laporan yang perlu direvisi atau ditolak.
+              </p>
+              <textarea
+                value={decisionNote}
+                onChange={event => setDecisionNote(event.target.value)}
+                maxLength={500}
+                placeholder="Tulis catatan untuk awardee..."
+                className="mt-4 min-h-24 w-full rounded-xl border border-slate-200 px-4 py-3 text-xs outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3 lg:w-[430px]">
+              <button disabled={!!savingReview} onClick={() => void decideReport('approved')}
+                className="rounded-xl bg-emerald-700 px-4 py-3 text-[10px] font-extrabold text-white">
+                Terima Laporan
+              </button>
+              <button disabled={!!savingReview} onClick={() => void decideReport('revision')}
+                className="rounded-xl bg-amber-500 px-4 py-3 text-[10px] font-extrabold text-white">
+                Butuh Revisi
+              </button>
+              <button disabled={!!savingReview} onClick={() => void decideReport('rejected')}
+                className="rounded-xl bg-rose-700 px-4 py-3 text-[10px] font-extrabold text-white">
+                Tolak Laporan
+              </button>
+            </div>
+          </div>
+        </section>
       )}
       <div className="grid gap-6 xl:grid-cols-[1.65fr_.8fr]">
         <div className="space-y-5">
@@ -3985,6 +4069,7 @@ function StatusPill({ status }: { status: ReviewStatus }) {
     review: 'bg-violet-50 text-violet-700',
     revision: 'bg-rose-50 text-rose-700',
     approved: 'bg-emerald-50 text-emerald-700',
+    rejected: 'bg-slate-900 text-white',
   }
   return (
     <span className={`w-fit rounded-full px-2.5 py-1 text-[8px] font-extrabold ${tones[status]}`}>
@@ -4001,6 +4086,8 @@ function OverallPill({ status }: { status: ReturnType<typeof overallStatus> }) {
         ? 'Disetujui'
         : status === 'revision'
           ? 'Perlu perbaikan'
+        : status === 'rejected'
+          ? 'Ditolak'
           : status === 'draft'
             ? 'Belum dikirim'
             : 'Dalam proses'
@@ -4009,6 +4096,8 @@ function OverallPill({ status }: { status: ReturnType<typeof overallStatus> }) {
       ? 'bg-emerald-100 text-emerald-800'
       : status === 'revision'
         ? 'bg-rose-100 text-rose-800'
+        : status === 'rejected'
+          ? 'bg-slate-900 text-white'
         : status === 'incomplete'
           ? 'bg-amber-100 text-amber-800'
           : 'bg-slate-100 text-slate-600'
@@ -4097,6 +4186,7 @@ function formatFileSize(size: number) {
 
 function matrixTone(status: ReturnType<typeof overallStatus>) {
   if (status === 'approved') return 'bg-emerald-600'
+  if (status === 'rejected') return 'bg-slate-800'
   if (status === 'revision') return 'bg-rose-500'
   if (status === 'incomplete') return 'bg-amber-500'
   if (status === 'draft') return 'bg-slate-400'

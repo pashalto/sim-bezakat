@@ -46,7 +46,7 @@ function profileFrom(fields: ProfileFields, academic: Academic[] = []): DemoProf
 }
 
 const statuses: Record<string, ReviewStatus> = {
-  draf: 'draft', perlu_revisi: 'revision', disetujui: 'approved', diajukan: 'submitted',
+  draf: 'draft', perlu_revisi: 'revision', disetujui: 'approved', ditolak: 'rejected', diajukan: 'submitted',
 }
 
 export async function portalSession(user: PortalUser): Promise<PortalSession> {

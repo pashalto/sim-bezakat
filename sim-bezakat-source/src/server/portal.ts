@@ -127,6 +127,7 @@ export async function clearDraft(user: PortalUser, value: unknown) {
 }
 
 const reviewOperations = new Set<ReportReviewInput['operation']>([
+  'approve-report', 'revise-report', 'reject-report',
   'approve-section', 'revise-section', 'approve-finance', 'revise-finance',
 ])
 export async function reviewReport(user: PortalUser, value: unknown) {
@@ -146,7 +147,7 @@ export async function reviewReport(user: PortalUser, value: unknown) {
     throw new PortalError(400, 'Bagian laporan tidak dikenal.')
   }
   let cleanIssues: ReportReviewInput['issues'] = []
-  if (operation.startsWith('revise')) {
+  if (operation.startsWith('revise') || operation === 'reject-report') {
     if (!Array.isArray(issues) || issues.length === 0 || issues.length > 40) {
       throw new PortalError(400, 'Catatan revisi wajib diisi.')
     }

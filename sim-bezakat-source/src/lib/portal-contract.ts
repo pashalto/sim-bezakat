@@ -3,7 +3,8 @@ export type PortalUser={id:string; username:string; name:string; role:'awardee'|
 export type StoredDraft={periodId:string;reportId:string|null;month:number;year:number;status:string;isOpen:boolean;version:number;savedAt:string|null;answers:Record<string,AnswerValue>;activities:OrganizationActivity[]}
 export type ReportReviewInput = {
   reportId: string
-  operation: 'approve-section' | 'revise-section' | 'approve-finance' | 'revise-finance'
+  operation: 'approve-report' | 'revise-report' | 'reject-report' |
+    'approve-section' | 'revise-section' | 'approve-finance' | 'revise-finance'
   target: string
   issues?: Array<{ questionId: string; reason: string }>
 }
