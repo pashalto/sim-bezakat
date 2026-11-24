@@ -617,9 +617,9 @@ function LoginPage({ onLogin, authenticate }: {
   return (
     <div className="min-h-screen bg-[#f4f5ef] p-4 sm:p-7">
       <div className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-[1240px] overflow-hidden rounded-[28px] border border-emerald-900/10 bg-white shadow-[0_28px_80px_rgba(6,78,59,.12)] sm:min-h-[calc(100vh-3.5rem)] lg:grid-cols-[1.08fr_.92fr]">
-        <section className="islamic-pattern relative hidden overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 p-12 text-white lg:flex lg:flex-col">
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-xl border border-white/20 bg-white/10 text-lg font-extrabold backdrop-blur">
+        <section className="relative isolate hidden overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 p-12 text-white lg:flex lg:flex-col">
+          <div className="flex items-center gap-3 pr-28">
+            <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 ring-1 ring-inset ring-white/20 text-lg font-extrabold text-white">
               S
             </div>
             <div>
@@ -629,23 +629,40 @@ function LoginPage({ onLogin, authenticate }: {
               </p>
             </div>
           </div>
-          <div className="relative z-10 my-auto max-w-lg">
-            <div className="mb-7 grid h-16 w-16 place-items-center rounded-2xl border border-amber-200/20 bg-amber-200/10 text-amber-200">
-              <Icon name="award" className="h-8 w-8" />
-            </div>
-            <p className="text-sm font-bold text-amber-200">Beasiswa Zakat Indonesia</p>
+          <svg className="absolute" width="0" height="0" aria-hidden="true" focusable="false">
+            <defs>
+              <filter id="bezakat-logo-dark" x="0" y="0" width="100%" height="100%" primitiveUnits="objectBoundingBox" colorInterpolationFilters="sRGB">
+                {/* Remove the white matte and lighten only the wordmark below the emblem. */}
+                <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -2 -2 -2 0 6" result="ink" />
+                <feFlood x="0" y="0.7" width="1" height="0.3" floodColor="white" />
+                <feComposite in2="ink" operator="atop" />
+              </filter>
+            </defs>
+          </svg>
+          <Image
+            src="/logo-bezakat.png"
+            alt="BeZakat"
+            width={120}
+            height={120}
+            className="absolute right-6 top-5 h-[120px] w-[120px] object-contain [filter:url(#bezakat-logo-dark)]"
+          />
+          <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -right-12 grid size-80 rotate-[22.5deg] place-items-center text-emerald-100/15">
+            <span className="absolute inset-0 border border-current" />
+            <span className="absolute inset-0 rotate-45 border border-current" />
+            <span className="absolute inset-8 border border-current" />
+            <span className="absolute inset-8 rotate-45 border border-current" />
+          </div>
+          <div className="relative my-auto max-w-lg py-12">
+            <p className="flex items-center gap-3 text-sm font-bold text-amber-200">
+              <span aria-hidden="true" className="h-px w-8 bg-amber-200/60" />
+              Beasiswa Zakat Indonesia
+            </p>
             <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight xl:text-5xl">
               Bertumbuh dalam ilmu,
               <br />
-              memberi manfaat.
+              <span className="text-white">memberi manfaat.</span>
             </h1>
-            <p className="mt-6 max-w-md text-sm leading-7 text-emerald-100/80">
-              Ruang monitoring perkembangan awardee yang rapi, aman, dan mudah dipahami bersama.
-            </p>
           </div>
-          <p className="relative z-10 text-[10px] leading-5 text-emerald-200/70">
-            {authenticate ? 'SIM-BEZAKAT · Database pengembangan lokal' : 'Prototype SIM-BEZAKAT · Data pada aplikasi ini sepenuhnya fiktif.'}
-          </p>
         </section>
         <section className="flex items-center justify-center p-7 sm:p-12">
           <div className="w-full max-w-md">

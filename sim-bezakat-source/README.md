@@ -4,21 +4,21 @@ Portal pemantauan Beasiswa Zakat Indonesia untuk awardee, koordinator, LAZ, dan 
 
 ## Menjalankan demo tanpa database
 
-Gunakan Node.js 24.22.1 atau lebih baru dan pnpm 10.34.3. Buka terminal di folder yang berisi `package.json`.
+Gunakan Node.js 24.22.1 atau lebih baru. Dari folder repo, buka PowerShell di subfolder `sim-bezakat-source` yang berisi `package.json`. Perintah instalasi berikut memakai pnpm 10.34.3 sesuai lockfile.
 
 ```powershell
-pnpm install --frozen-lockfile
-pnpm run config:init
+npx.cmd --yes pnpm@10.34.3 install --frozen-lockfile
+npm.cmd run config:init
 ```
 
-Di `.env.local`, pertahankan `BEZAKAT_STORAGE=demo` dan isi sendiri `BEZAKAT_DEMO_PASSWORD` untuk login. Kolom koneksi database dapat dibiarkan seperti contoh. Kata sandi demo digunakan di server. Akun awardee fiktif yang bisa dicoba adalah `BZI-251-0000001`.
+Di `.env.local`, pertahankan `BEZAKAT_STORAGE=demo` dan isi sendiri `BEZAKAT_DEMO_PASSWORD` untuk login. Kolom koneksi database dapat dibiarkan seperti contoh. Kata sandi demo digunakan di server. Simpan file, lalu masuk memakai ID awardee fiktif `BZI-251-0000001` dan kata sandi yang baru kamu pilih. Perubahan data demo disimpan di browser masing-masing.
 
 ```powershell
-pnpm run build
-pnpm run start
+npm.cmd run build
+npm.cmd run start
 ```
 
-Buka alamat lokal yang ditampilkan di terminal. Untuk mengedit portal sambil melihat perubahan, jalankan `pnpm run dev`. Konfigurasi deployment mode demo menggunakan variabel server yang sama.
+Buka alamat lokal yang ditampilkan di terminal. Untuk mengedit portal sambil melihat perubahan, jalankan `npm.cmd run dev`. Konfigurasi deployment mode demo menggunakan variabel server yang sama.
 
 ## Menjalankan dengan PostgreSQL di Windows
 
@@ -72,4 +72,4 @@ Jalankan `npm.cmd run typecheck` dan `npm.cmd run build`. Setelah build selesai,
 - `database/seeds` berisi contoh fiktif. `database/tests` berisi pemeriksaan SQL untuk database uji. Pengujian hash pada 002 membutuhkan parameter sesi `sim_bezakat.test_password` yang sesuai dengan seed uji.
 - `npm.cmd run typecheck` memeriksa TypeScript. Login, baca data, dan simpan draf tersedia pada mode PostgreSQL. Pengajuan akhir, verifikasi, edit profil, dan unggahan melalui portal masih dalam pengembangan.
 
-Saat menyiapkan repositori GitHub, gunakan folder yang berisi README ini sebagai akar repositori. Simpan password dan berkas unggahan hanya di komputer lokal.
+Simpan kata sandi di `.env.local` pada komputermu. Repo hanya menyertakan templat `.env.example`.
