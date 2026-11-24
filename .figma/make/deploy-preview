@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export NODE_ENV=production
+
+cd sim-bezakat-source
+pnpm run build
+figma make deploy-preview --build-dir .next

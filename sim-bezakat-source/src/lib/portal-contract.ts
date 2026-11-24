@@ -1,6 +1,18 @@
 import type { AnswerValue, OrganizationActivity } from './demo-data'
 export type PortalUser={id:string; username:string; name:string; role:'awardee'|'coordinator'|'institution'|'ministry'; roleLabel:string}
 export type StoredDraft={periodId:string;reportId:string|null;month:number;year:number;status:string;isOpen:boolean;version:number;savedAt:string|null;answers:Record<string,AnswerValue>;activities:OrganizationActivity[]}
+export type ReportReviewInput = {
+  reportId: string
+  operation: 'approve-report' | 'revise-report' | 'reject-report' |
+    'approve-section' | 'revise-section' | 'approve-finance' | 'revise-finance'
+  target: string
+  issues?: Array<{ questionId: string; reason: string }>
+}
+export type ReportReviewAction = Omit<ReportReviewInput, 'reportId'>
+export type ReportReviewBatchInput = {
+  reportId: string
+  reviews: ReportReviewAction[]
+}
 export type PortalSession = {
   user: import('./demo-data').DemoAccount
   state: import('./demo-data').DemoState

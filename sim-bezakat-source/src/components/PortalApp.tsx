@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction, type ChangeEvent, type ReactNode } from 'react'
 import Image from 'next/image'
-import type { PortalSession, StoredDraft } from '@/lib/portal-contract'
+import type { PortalSession, ReportReviewBatchInput, ReportReviewInput, StoredDraft } from '@/lib/portal-contract'
 import {
   activePeriodFor,
   createInitialDemoState,
@@ -284,6 +284,7 @@ type PortalViewsProps = {
   persistDraft?: (period: PeriodRecord) => Promise<void>
   clearDraft: (period: PeriodRecord) => Promise<void> | void
   refresh?: (signal?: AbortSignal) => Promise<PortalSession>
+  reviewPeriod?: (input: ReportReviewBatchInput) => Promise<void>
 }
 // Tanggal 10 pukul 00.00 WIB adalah tanggal 9 pukul 17.00 UTC.
 function reportPeriodCutoff(period: {month: number; year: number}) {
@@ -327,7 +328,7 @@ function useDashboardPeriod(period: PortalSession['activePeriod'], refresh?: Por
   return refresh && cutoff !== null && cutoff === expiredCutoff ? null : period
 }
 
-function PortalViews({ account, state, setState, activePeriod, logout, persistDraft, clearDraft, refresh }: PortalViewsProps) {
+function PortalViews({ account, state, setState, activePeriod, logout, persistDraft, clearDraft, refresh, reviewPeriod }: PortalViewsProps) {
   const [active, setActive] = useState('dashboard')
   const [menuOpen, setMenuOpen] = useState(false)
   const [headerPanel, setHeaderPanel] = useState<HeaderPanel>(null)
@@ -572,6 +573,7 @@ function PortalViews({ account, state, setState, activePeriod, logout, persistDr
               {active === 'staff-detail' && selectedPeriod && (
                 <StaffPeriodDetail
                   connected={!!persistDraft}
+                  persistReview={reviewPeriod}
                   account={account}
                   period={selectedPeriod}
                   profile={state.profiles[selectedPeriod.ownerId]}
@@ -3255,7 +3257,8 @@ function StaffDashboard({
     (period) => period.reportStatus === 'submitted' || financeStatus(period) === 'submitted',
   ).length
   const revisions = periods.filter(
-    (period) => period.reportStatus === 'revision' || financeStatus(period) === 'revision',
+    (period) => ['revision', 'rejected'].includes(period.reportStatus) ||
+      ['revision', 'rejected'].includes(financeStatus(period)),
   ).length
   const approved = periods.filter((period) => overallStatus(period) === 'approved').length
   return (
@@ -3286,7 +3289,7 @@ function StaffDashboard({
         />
         <DashboardStat
           icon="alert"
-          label="Perlu perbaikan"
+          label="Perlu tindak lanjut"
           value={String(revisions)}
           note="Periode"
           tone="rose"
@@ -3432,8 +3435,239 @@ function AwardeeMatrix({
   )
 }
 
+function escapePdfText(value: unknown) {
+  return String(value ?? '—')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+}
+
+function pdfValue(value: unknown) {
+  if (value === undefined || value === null || value === '') return '—'
+  return escapePdfText(value)
+}
+
+function pdfSelectedValues(value?: AnswerValue) {
+  if (Array.isArray(value)) return new Set(value)
+  return new Set(value ? [value] : [])
+}
+
+function renderPdfQuestion(
+  question: ReportQuestion,
+  value: AnswerValue | undefined,
+  number: string,
+  issue?: string,
+) {
+  const selected = pdfSelectedValues(value)
+  const options = question.options ?? []
+  const answer = Array.isArray(value) ? value.join(', ') : value
+  const answerHtml = options.length
+    ? `<div class="choices">${options.map(option => (
+        `<span class="choice"><span class="box">${selected.has(option) ? '☒' : '☐'}</span>${escapePdfText(option)}</span>`
+      )).join('')}</div>`
+    : `<div class="narrative">${pdfValue(answer)}</div>`
+
+  return `<article class="question">
+    <div class="question-title"><span class="question-number">${escapePdfText(number)}.</span><span>${escapePdfText(question.label)}</span></div>
+    ${question.hint ? `<p class="hint">${escapePdfText(question.hint)}</p>` : ''}
+    ${answerHtml}
+    ${issue ? `<div class="review-note"><strong>Catatan pemeriksa:</strong> ${escapePdfText(issue)}</div>` : ''}
+  </article>`
+}
+
+function safePdfPhotoUrl(photoUrl: string) {
+  if (!photoUrl) return ''
+  if (/^data:image\/(?:png|jpe?g|gif|webp);base64,/i.test(photoUrl) || photoUrl.startsWith('blob:')) {
+    return photoUrl
+  }
+  try {
+    const resolved = new URL(photoUrl, window.location.href)
+    return resolved.origin === window.location.origin && /^https?:$/.test(resolved.protocol)
+      ? resolved.href
+      : ''
+  } catch {
+    return ''
+  }
+}
+
+function exportPeriodPdf(
+  period: PeriodRecord,
+  profile: DemoProfile,
+  onToast: (message: string) => void,
+) {
+  const popup = window.open('', '_blank')
+  if (!popup) {
+    onToast('Izinkan pop-up untuk mengekspor PDF.')
+    return
+  }
+  const reportProfile = period.profileSnapshot ?? profile
+  const identityRows = [
+    ['Nama lengkap', reportProfile.fullName],
+    ['Tempat, tanggal lahir', `${reportProfile.birthPlace || '—'}, ${reportProfile.birthDate || '—'}`],
+    ['Jenis kelamin', reportProfile.gender],
+    ['Alamat sesuai identitas', reportProfile.identityAddress],
+    ['Jenis domisili', reportProfile.domicileType],
+    ['Alamat domisili', reportProfile.domicileAddress],
+    ['Nama orang tua/wali', reportProfile.guardianName],
+    ['Kontak orang tua/wali', reportProfile.guardianContact],
+    ['Media sosial', reportProfile.socialMedia],
+  ]
+  const studentRows = [
+    ['Perguruan tinggi', reportProfile.university],
+    ['Program studi', reportProfile.studyProgram],
+    ['Nomor induk mahasiswa', reportProfile.studentNumber],
+    ['Nomor registrasi BeZakat', reportProfile.registrationNumber],
+    ['Lembaga penyantun', reportProfile.sponsor],
+    ['Status beasiswa', reportProfile.scholarshipStatus],
+    ['Indeks prestasi', `${reportProfile.gpaType} ${reportProfile.gpaValue || '—'}`],
+    ['Periode indeks prestasi', reportProfile.gpaSemester],
+    ['Riwayat indeks prestasi', reportProfile.gpaHistory.length
+      ? reportProfile.gpaHistory.map((item, index) => `S${index + 1}: ${item || '—'}`).join(' · ')
+      : '—'],
+  ]
+  const renderRows = (rows: (string | undefined)[][]) => rows.map(([label, value], index) => (
+    `<tr><td class="row-number">${index + 1}</td><th>${escapePdfText(label)}</th><td>${pdfValue(value)}</td></tr>`
+  )).join('')
+  const summarySection = reportSections.find(section => section.key === 'ringkasan')
+  const assessmentSections = reportSections.filter(section => section.key !== 'ringkasan')
+  const summaryQuestion = summarySection?.questions[0]
+  const summaryIssue = period.sectionReviews.ringkasan?.issues.find(
+    item => item.questionId === summaryQuestion?.id,
+  )?.reason
+  const sectionLetters = ['D', 'E', 'F', 'G', 'H', 'I', 'J']
+  const assessmentHtml = assessmentSections.map((section, sectionIndex) => {
+    const review = period.sectionReviews[section.key]
+    return `<section class="report-section">
+      <div class="section-heading">
+        <span>${sectionLetters[sectionIndex]}.</span>
+        <div><h2>${escapePdfText(section.label.toUpperCase())}</h2><p>${escapePdfText(section.description)}</p></div>
+        <span class="section-status">${escapePdfText(statusLabel(review?.status ?? 'draft'))}</span>
+      </div>
+      <div class="question-list">${section.questions.map((question, questionIndex) => {
+        const issue = review?.issues.find(item => item.questionId === question.id)?.reason
+        return renderPdfQuestion(
+          question,
+          period.answers[question.id],
+          `${sectionLetters[sectionIndex]}.${questionIndex + 1}`,
+          issue,
+        )
+      }).join('')}</div>
+    </section>`
+  }).join('')
+  const activities = period.activities.length
+    ? period.activities.map((activity, index) => `<tr>
+        <td class="row-number">${index + 1}</td>
+        <td><strong>${escapePdfText(activity.name)}</strong><br><span class="muted">${escapePdfText(activity.type)} · ${escapePdfText(activity.role)}</span></td>
+        <td>${pdfValue(activity.description)}</td>
+        <td>${pdfValue(activity.evidence)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Tidak ada kegiatan organisasi atau kepanitiaan.</td></tr>'
+  const finance = period.financeDocuments.length
+    ? period.financeDocuments.map((document, index) => `<tr>
+        <td class="row-number">${index + 1}</td>
+        <td>${escapePdfText(document.category === 'current' ? 'Realisasi bulan berjalan' : 'Rencana bulan berikutnya')}</td>
+        <td>${escapePdfText(document.name)}<br><span class="muted">${escapePdfText(formatFileSize(document.size))} · diunggah ${escapePdfText(formatDateTime(document.uploadedAt))}</span></td>
+        <td><span class="document-status">${escapePdfText(statusLabel(document.status))}</span>${document.reason
+          ? `<div class="review-note compact"><strong>Catatan:</strong> ${escapePdfText(document.reason)}</div>`
+          : ''}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Belum ada dokumen keuangan.</td></tr>'
+  const history = period.reviewHistory.length
+    ? period.reviewHistory.map((event, index) => `<tr>
+        <td class="row-number">${index + 1}</td>
+        <td>${escapePdfText(formatDateTime(event.date))}</td>
+        <td>${escapePdfText(event.actor)}</td>
+        <td>${escapePdfText(event.text)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Belum ada riwayat pemeriksaan.</td></tr>'
+  const exportedStatus = overallStatus(period)
+  const exportedStatusLabel = exportedStatus === 'incomplete' ? 'Belum lengkap' : statusLabel(exportedStatus)
+  const photoUrl = safePdfPhotoUrl(profile.photoUrl)
+  const photo = photoUrl
+    ? `<img class="profile-photo" src="${escapePdfText(photoUrl)}" alt="Foto terbaru ${escapePdfText(reportProfile.fullName)}">`
+    : `<div class="photo-placeholder"><span>FOTO TERBARU</span><small>Belum tersedia</small></div>`
+  const submittedAt = period.submittedAt ? formatDateTime(period.submittedAt) : 'Belum dikirim'
+  const generatedAt = new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })
+
+  popup.document.write(`<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><title>SIM-BEZAKAT · ${escapePdfText(periodLabel(period.month, period.year))}</title>
+<style>
+@page{size:A4;margin:14mm 14mm 16mm}*{box-sizing:border-box}html{background:#edf3f0}body{width:210mm;min-height:297mm;margin:0 auto;background:#fff;color:#17251f;font-family:Arial,Helvetica,sans-serif;font-size:9.2pt;line-height:1.45;padding:14mm}
+h1,h2,p{margin:0}.document-header{border-top:8px solid #126448;border-bottom:2px solid #126448;padding:12px 0 10px;text-align:center}.kicker{font-size:8pt;font-weight:700;letter-spacing:1.8px;color:#126448}.document-header h1{max-width:150mm;margin:6px auto 3px;font-size:17pt;line-height:1.25}.period-title{font-size:11pt;font-weight:700;color:#3c554b}
+.cover-grid{display:grid;grid-template-columns:38mm 1fr;gap:12mm;align-items:center;margin:16mm 0 10mm}.profile-photo,.photo-placeholder{width:38mm;height:50mm;border:1.5px solid #126448}.profile-photo{display:block;object-fit:cover}.photo-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f2f7f4;color:#507066;font-weight:700;letter-spacing:.7px}.photo-placeholder small{margin-top:5px;font-size:7pt;font-weight:400;letter-spacing:0}.cover-name{font-size:19pt;line-height:1.2;color:#103e2f}.cover-registration{margin-top:5px;font-size:10pt;color:#52665e}.cover-meta{display:grid;grid-template-columns:42mm 1fr;margin-top:12px;border-top:1px solid #cbd8d2}.cover-meta dt,.cover-meta dd{margin:0;padding:5px 0;border-bottom:1px solid #cbd8d2}.cover-meta dt{font-weight:700}.status-pill{display:inline-block;border:1px solid #126448;background:#e7f3ed;color:#126448;padding:2px 7px;font-weight:700;text-transform:uppercase;font-size:7.5pt}
+.document-note{margin:8mm 0 12mm;padding:7px 9px;border-left:3px solid #126448;background:#f2f7f4;color:#40564d;font-size:8pt}.section-heading{display:grid;grid-template-columns:8mm 1fr auto;gap:2mm;align-items:start;margin:8mm 0 3mm;padding:6px 7px;background:#126448;color:#fff;break-after:avoid}.section-heading>span:first-child,.section-heading h2{font-size:10.5pt;font-weight:700}.section-heading p{margin-top:2px;font-size:7.5pt;color:#dcece5}.section-status{align-self:center;border:1px solid #bad8ca;padding:2px 5px;font-size:7pt;font-weight:700;text-transform:uppercase}
+table{width:100%;border-collapse:collapse}.form-table tr,.evidence-table tr{break-inside:avoid}.form-table th,.form-table td,.evidence-table th,.evidence-table td{border:1px solid #8ca39a;padding:5px 6px;text-align:left;vertical-align:top}.form-table th{width:35%;background:#eef5f1;font-weight:700}.row-number{width:8mm!important;text-align:center!important;background:#f7faf8!important;font-weight:700}.evidence-table thead th{background:#dcece5;color:#153e31}.evidence-table .empty{text-align:center;padding:12px;color:#64776f}.muted{color:#64776f;font-size:7.5pt}
+.question-list{border:1px solid #8ca39a;border-bottom:0}.question{padding:7px 8px;border-bottom:1px solid #8ca39a;break-inside:avoid}.question-title{display:flex;gap:5px;font-weight:700}.question-number{min-width:11mm;color:#126448}.hint{margin:3px 0 0 13mm;color:#687b73;font-size:7.5pt;font-style:italic}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 10px;margin:6px 0 0 13mm}.choice{display:flex;align-items:flex-start;gap:4px}.box{font-family:"Arial Unicode MS","Segoe UI Symbol",Arial,sans-serif;color:#126448;font-size:11pt;line-height:1}.narrative{min-height:13mm;margin:6px 0 0 13mm;padding:6px 7px;border:1px solid #b7c8c0;background:#fbfcfb;white-space:pre-wrap}.review-note{margin:6px 0 0 13mm;padding:5px 7px;border-left:3px solid #b42318;background:#fff0ee;color:#7a271a;font-size:8pt}.review-note.compact{margin:4px 0 0;padding:4px 5px}.summary-box{min-height:28mm;padding:9px;border:1px solid #8ca39a;background:#fbfcfb;white-space:pre-wrap}.summary-meta{display:flex;gap:14px;margin-top:5px;color:#52665e;font-size:7.5pt}
+.signoff{display:grid;grid-template-columns:1fr 58mm;gap:12mm;margin-top:10mm;break-inside:avoid}.signoff-note{color:#52665e;font-size:8pt}.signature{text-align:center}.signature-space{height:20mm}.footer{margin-top:12mm;padding-top:5px;border-top:1px solid #9eb0a8;color:#667970;font-size:7pt;text-align:center}
+.no-print{position:fixed;z-index:10;right:18px;top:18px;padding:11px 16px;border:0;border-radius:7px;background:#126448;color:#fff;font-weight:700;box-shadow:0 6px 18px #0003;cursor:pointer}
+@media print{html,body{background:#fff}body{width:auto;min-height:0;margin:0;padding:0}.no-print{display:none}.report-section{break-before:auto}.section-heading{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style></head><body>
+<button class="no-print" onclick="window.print()">Simpan sebagai PDF</button>
+<header class="document-header">
+  <p class="kicker">SISTEM INFORMASI MANAJEMEN BEASISWA ZAKAT INDONESIA</p>
+  <h1>LAPORAN ASESMEN BULANAN<br>PENERIMA BEASISWA ZAKAT INDONESIA</h1>
+  <p class="period-title">Periode ${escapePdfText(periodLabel(period.month, period.year))}</p>
+</header>
+<section class="cover-grid">
+  ${photo}
+  <div>
+    <p class="kicker">IDENTITAS PENERIMA BEASISWA</p>
+    <h2 class="cover-name">${escapePdfText(reportProfile.fullName)}</h2>
+    <p class="cover-registration">${escapePdfText(reportProfile.registrationNumber)} · ${escapePdfText(reportProfile.university)}</p>
+    <dl class="cover-meta">
+      <dt>Periode asesmen</dt><dd>${escapePdfText(periodLabel(period.month, period.year))}</dd>
+      <dt>Tanggal pengiriman</dt><dd>${escapePdfText(submittedAt)}</dd>
+      <dt>Status laporan</dt><dd><span class="status-pill">${escapePdfText(exportedStatusLabel)}</span></dd>
+      <dt>Dana diterima</dt><dd>${period.allowanceReceived === undefined ? '—' : period.allowanceReceived ? 'Ya' : 'Tidak'}</dd>
+    </dl>
+  </div>
+</section>
+<p class="document-note">Dokumen ini memuat data profil, jawaban asesmen, bukti kegiatan, laporan keuangan, serta hasil pemeriksaan koordinator sesuai data yang tersimpan pada SIM-BEZAKAT.</p>
+
+<section>
+  <div class="section-heading"><span>A.</span><div><h2>IDENTITAS DIRI</h2><p>Data pribadi penerima Beasiswa Zakat Indonesia</p></div></div>
+  <table class="form-table"><tbody>${renderRows(identityRows)}</tbody></table>
+</section>
+<section>
+  <div class="section-heading"><span>B.</span><div><h2>DATA KEMAHASISWAAN</h2><p>Data akademik dan kepesertaan program beasiswa</p></div></div>
+  <table class="form-table"><tbody>${renderRows(studentRows)}</tbody></table>
+</section>
+<section>
+  <div class="section-heading"><span>C.</span><div><h2>KABAR BULAN INI</h2><p>Ringkasan asesmen penerima beasiswa pada periode pelaporan</p></div><span class="section-status">${escapePdfText(statusLabel(period.sectionReviews.ringkasan?.status ?? 'draft'))}</span></div>
+  <div class="summary-box">${summaryQuestion ? pdfValue(period.answers[summaryQuestion.id]) : '—'}</div>
+  ${summaryIssue ? `<div class="review-note"><strong>Catatan pemeriksa:</strong> ${escapePdfText(summaryIssue)}</div>` : ''}
+  <div class="summary-meta"><span>Periode: ${escapePdfText(periodLabel(period.month, period.year))}</span><span>Status: ${escapePdfText(exportedStatusLabel)}</span></div>
+</section>
+
+${assessmentHtml}
+
+<section>
+  <div class="section-heading"><span>K.</span><div><h2>RINCIAN AKTIVITAS ORGANISASI</h2><p>Kegiatan, peran, deskripsi, dan bukti pendukung</p></div></div>
+  <table class="evidence-table"><thead><tr><th>No.</th><th>Kegiatan & peran</th><th>Uraian</th><th>Bukti</th></tr></thead><tbody>${activities}</tbody></table>
+</section>
+<section>
+  <div class="section-heading"><span>L.</span><div><h2>LAPORAN KEUANGAN & LAMPIRAN</h2><p>Dokumen realisasi dan rencana penggunaan dana</p></div></div>
+  <table class="evidence-table"><thead><tr><th>No.</th><th>Kategori</th><th>Dokumen</th><th>Hasil pemeriksaan</th></tr></thead><tbody>${finance}</tbody></table>
+</section>
+<section>
+  <div class="section-heading"><span>M.</span><div><h2>HASIL & RIWAYAT PEMERIKSAAN</h2><p>Jejak keputusan dan catatan koordinator</p></div><span class="section-status">${escapePdfText(exportedStatusLabel)}</span></div>
+  <table class="evidence-table"><thead><tr><th>No.</th><th>Waktu</th><th>Pemeriksa</th><th>Catatan/keputusan</th></tr></thead><tbody>${history}</tbody></table>
+</section>
+<section class="signoff">
+  <p class="signoff-note">Laporan ini dihasilkan secara elektronik dari SIM-BEZAKAT. Status dan catatan pemeriksaan pada dokumen mengikuti data terakhir saat ekspor.</p>
+  <div class="signature"><p>${escapePdfText(new Date().toLocaleDateString('id-ID', { dateStyle: 'long' }))}</p><p>Koordinator Awardee</p><div class="signature-space"></div><p><strong>( .................................... )</strong></p></div>
+</section>
+<p class="footer">Dokumen SIM-BEZAKAT · Diekspor pada ${escapePdfText(generatedAt)} · ${escapePdfText(reportProfile.registrationNumber)}</p>
+</body></html>`)
+  popup.document.close()
+  onToast('Dokumen PDF siap dicetak atau disimpan.')
+}
+
 function StaffPeriodDetail({
   connected = false,
+  persistReview,
   account,
   period,
   profile,
@@ -3442,6 +3676,7 @@ function StaffPeriodDetail({
   onToast,
 }: {
   connected?: boolean
+  persistReview?: (input: ReportReviewBatchInput) => Promise<void>
   account: DemoAccount
   period: PeriodRecord
   profile: DemoProfile
@@ -3453,62 +3688,58 @@ function StaffPeriodDetail({
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([])
   const [reason, setReason] = useState('')
   const [financeReview, setFinanceReview] = useState<string | null>(null)
-  const readOnly = connected || account.role !== 'coordinator'
+  const [savingReview, setSavingReview] = useState('')
+  const [bulkRejectOpen, setBulkRejectOpen] = useState(false)
+  const [bulkRejectReason, setBulkRejectReason] = useState('')
+  const [finalDraftDecision, setFinalDraftDecision] = useState<'approved' | 'rejected' | null>(null)
+  const hasFinalDecision = ['revision', 'approved', 'rejected'].includes(period.reportStatus)
+  const [editingReview, setEditingReview] = useState(!hasFinalDecision)
+  const [draftSectionReviews, setDraftSectionReviews] = useState<Record<string, PeriodRecord['sectionReviews'][string]>>(
+    () => Object.fromEntries(Object.entries(period.sectionReviews).filter(([, review]) =>
+      review.status === 'approved' || review.status === 'revision')),
+  )
+  const [draftFinanceReviews, setDraftFinanceReviews] = useState<Record<string, { status: ReviewStatus; reason?: string }>>(
+    () => Object.fromEntries(period.financeDocuments
+      .filter(document => document.status === 'approved' || document.status === 'revision')
+      .map(document => [document.id, { status: document.status, reason: document.reason }])),
+  )
+  const canReview = account.role === 'coordinator'
+  const readOnly = !canReview || !editingReview
+  const reviewedSections = reportSections.filter(section => draftSectionReviews[section.key]).length
+  const reviewedFinance = period.financeDocuments.filter(document => draftFinanceReviews[document.id]).length
+  const reviewComplete = reviewedSections === reportSections.length &&
+    reviewedFinance === period.financeDocuments.length
 
-  const approveSection = (sectionKey: string) => {
-    const nextReviews = {
-      ...period.sectionReviews,
-      [sectionKey]: { status: 'approved' as ReviewStatus, issues: [] },
-    }
-    updatePeriod({
-      ...period,
-      sectionReviews: nextReviews,
-      reportStatus: Object.values(nextReviews).every((item) => item.status === 'approved')
-        ? 'approved'
-        : 'submitted',
-      reviewHistory: [
-        ...period.reviewHistory,
-        {
-          date: new Date().toISOString(),
-          actor: account.name,
-          text: `${reportSections.find((item) => item.key === sectionKey)?.label} disetujui.`,
-        },
-      ],
-    })
-    onToast('Bagian laporan disetujui.')
+  const approveSection = async (sectionKey: string) => {
+    setFinalDraftDecision(null)
+    setDraftSectionReviews(current => ({
+      ...current,
+      [sectionKey]: { status: 'approved', issues: [] },
+    }))
+    setReviewing(null)
+    onToast('Keputusan bagian disimpan sementara. Lanjutkan pemeriksaan bagian berikutnya.')
   }
 
-  const requestRevision = (sectionKey: string) => {
-    if (!selectedQuestions.length || !reason) {
-      onToast('Pilih minimal satu isian dan satu alasan.')
+  const requestRevision = async (sectionKey: string) => {
+    if (!selectedQuestions.length || !reason.trim()) {
+      onToast('Pilih minimal satu isian dan tulis alasan perbaikan.')
       return
     }
-    updatePeriod({
-      ...period,
-      reportStatus: 'revision',
-      sectionReviews: {
-        ...period.sectionReviews,
-        [sectionKey]: {
-          status: 'revision',
-          issues: selectedQuestions.map((questionId) => ({ questionId, reason })),
-        },
+    setFinalDraftDecision(null)
+    setDraftSectionReviews(current => ({
+      ...current,
+      [sectionKey]: {
+        status: 'revision',
+        issues: selectedQuestions.map(questionId => ({ questionId, reason: reason.trim() })),
       },
-      reviewHistory: [
-        ...period.reviewHistory,
-        {
-          date: new Date().toISOString(),
-          actor: account.name,
-          text: `${selectedQuestions.length} isian ditandai perlu perbaikan (${reason}).`,
-        },
-      ],
-    })
+    }))
     setReviewing(null)
     setSelectedQuestions([])
     setReason('')
-    onToast('Permintaan perbaikan berhasil disimpan.')
+    onToast('Catatan perbaikan disimpan sementara. Belum dikirim ke awardee.')
   }
 
-  const updateFinance = (
+  const updateFinance = async (
     document: FinanceDocument,
     status: ReviewStatus,
     selectedReason?: string,
@@ -3517,31 +3748,134 @@ function StaffPeriodDetail({
       onToast('Pilih alasan perbaikan dokumen.')
       return
     }
-    updatePeriod({
-      ...period,
-      financeDocuments: period.financeDocuments.map((item) =>
-        item.id === document.id
-          ? { ...item, status, reason: status === 'revision' ? selectedReason : undefined }
-          : item,
-      ),
-      reviewHistory: [
-        ...period.reviewHistory,
-        {
-          date: new Date().toISOString(),
-          actor: account.name,
-          text:
-            status === 'approved'
-              ? `${document.name} disetujui.`
-              : `${document.name} perlu diganti (${selectedReason}).`,
-        },
-      ],
-    })
+    setFinalDraftDecision(null)
+    setDraftFinanceReviews(current => ({
+      ...current,
+      [document.id]: { status, reason: status === 'revision' ? selectedReason : undefined },
+    }))
     setFinanceReview(null)
-    onToast(
-      status === 'approved'
-        ? 'Dokumen keuangan disetujui.'
-        : 'Permintaan penggantian dokumen disimpan.',
-    )
+    onToast('Keputusan dokumen disimpan sementara.')
+  }
+
+  const approveAll = () => {
+    setEditingReview(true)
+    setBulkRejectOpen(false)
+    setFinalDraftDecision('approved')
+    setDraftSectionReviews(Object.fromEntries(reportSections.map(section => [
+      section.key,
+      { status: 'approved' as ReviewStatus, issues: [] },
+    ])))
+    setDraftFinanceReviews(Object.fromEntries(period.financeDocuments.map(document => [
+      document.id,
+      { status: 'approved' as ReviewStatus },
+    ])))
+    onToast('Semua bagian dan dokumen ditandai disetujui dalam draft. Tekan Kirim Semua Hasil Pemeriksaan untuk mengirim.')
+  }
+
+  const rejectAll = () => {
+    if (!bulkRejectReason.trim()) {
+      onToast('Tulis alasan penolakan terlebih dahulu.')
+      return
+    }
+    const rejectionReason = bulkRejectReason.trim()
+    setEditingReview(true)
+    setFinalDraftDecision('rejected')
+    setDraftSectionReviews(Object.fromEntries(reportSections.map(section => [
+      section.key,
+      {
+        status: 'revision' as ReviewStatus,
+        issues: section.questions.map(question => ({ questionId: question.id, reason: rejectionReason })),
+      },
+    ])))
+    setDraftFinanceReviews(Object.fromEntries(period.financeDocuments.map(document => [
+      document.id,
+      { status: 'revision' as ReviewStatus, reason: rejectionReason },
+    ])))
+    setBulkRejectOpen(false)
+    onToast('Semua bagian ditandai ditolak dalam draft. Tekan Kirim Semua Hasil Pemeriksaan untuk mengirim.')
+  }
+
+  const submitAllReviews = async () => {
+    if (!reviewComplete) {
+      onToast('Periksa seluruh bagian dan dokumen keuangan sebelum mengirim.')
+      return
+    }
+    const sectionActions: ReportReviewInput[] = reportSections.map(section => {
+      const review = draftSectionReviews[section.key]
+      return {
+        reportId: period.reportId ?? period.id,
+        operation: review.status === 'approved' ? 'approve-section' : 'revise-section',
+        target: section.key,
+        issues: review.status === 'revision' ? review.issues : undefined,
+      }
+    })
+    const financeActions: ReportReviewInput[] = period.financeDocuments.map(document => {
+      const review = draftFinanceReviews[document.id]
+      return {
+        reportId: period.reportId ?? period.id,
+        operation: review.status === 'approved' ? 'approve-finance' : 'revise-finance',
+        target: document.id,
+        issues: review.status === 'revision'
+          ? [{ questionId: document.id, reason: review.reason ?? 'Dokumen perlu diperbaiki.' }]
+          : undefined,
+      }
+    })
+    const revisionCount = Object.values(draftSectionReviews).filter(review => review.status === 'revision').length +
+      Object.values(draftFinanceReviews).filter(review => review.status === 'revision').length
+    const finalAction: ReportReviewInput = finalDraftDecision === 'rejected'
+      ? {
+          reportId: period.reportId ?? period.id,
+          operation: 'reject-report',
+          target: 'report',
+          issues: [{ questionId: 'report', reason: bulkRejectReason.trim() || 'Laporan ditolak oleh koordinator.' }],
+        }
+      : revisionCount
+      ? {
+          reportId: period.reportId ?? period.id,
+          operation: 'revise-report',
+          target: 'report',
+          issues: [{ questionId: 'report', reason: `${revisionCount} bagian atau dokumen memerlukan perbaikan.` }],
+        }
+      : { reportId: period.reportId ?? period.id, operation: 'approve-report', target: 'report' }
+    setSavingReview('submit-all')
+    try {
+      if (persistReview) {
+        if (!period.reportId) throw new Error('Identitas laporan tidak tersedia. Muat ulang halaman.')
+        await persistReview({
+          reportId: period.reportId,
+          reviews: [...sectionActions, ...financeActions, finalAction].map(({ reportId: _reportId, ...action }) => action),
+        })
+      } else {
+        updatePeriod({
+          ...period,
+          reportStatus: finalDraftDecision === 'rejected' ? 'rejected' : revisionCount ? 'revision' : 'approved',
+          sectionReviews: draftSectionReviews,
+          financeDocuments: period.financeDocuments.map(document => ({
+            ...document,
+            ...draftFinanceReviews[document.id],
+          })),
+          reviewHistory: [...period.reviewHistory, {
+            date: new Date().toISOString(),
+            actor: account.name,
+            text: finalDraftDecision === 'rejected'
+              ? `Hasil pemeriksaan dikirim: laporan ditolak (${bulkRejectReason.trim()}).`
+              : revisionCount
+              ? `Hasil pemeriksaan dikirim: ${revisionCount} bagian atau dokumen perlu diperbaiki.`
+              : 'Hasil pemeriksaan dikirim: seluruh bagian dan dokumen disetujui.',
+          }],
+        })
+      }
+      setEditingReview(false)
+      onToast(finalDraftDecision === 'rejected'
+        ? 'Penolakan seluruh laporan berhasil dikirim.'
+        : revisionCount
+        ? 'Seluruh hasil pemeriksaan dikirim sekaligus ke awardee.'
+        : 'Laporan diterima setelah seluruh bagian selesai diperiksa.')
+    } catch (error) {
+      onToast(error instanceof Error ? error.message : 'Hasil pemeriksaan gagal dikirim.')
+    } finally {
+      setSavingReview('')
+    }
   }
 
   return (
@@ -3557,21 +3891,159 @@ function StaffPeriodDetail({
         title={periodLabel(period.month, period.year)}
         description={
           readOnly
-            ? 'Mode monitoring hanya-baca. Jawaban awardee tidak dapat diubah.'
+            ? canReview
+              ? 'Pemeriksaan dikunci setelah keputusan tersimpan. Aktifkan Edit Pemeriksaan untuk melakukan koreksi.'
+              : 'Mode monitoring hanya-baca. Jawaban awardee tidak dapat diubah.'
             : 'Setujui laporan per subbab atau tandai isian tertentu untuk diperbaiki.'
         }
-        action={<OverallPill status={overallStatus(period)} />}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            {canReview && hasFinalDecision && (
+              <button
+                onClick={() => {
+                  setEditingReview(current => !current)
+                  setReviewing(null)
+                  setFinanceReview(null)
+                  setSelectedQuestions([])
+                  setReason('')
+                }}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-[10px] font-extrabold shadow-sm ${
+                  editingReview
+                    ? 'border border-slate-200 bg-white text-slate-700'
+                    : 'bg-amber-500 text-white'
+                }`}
+              >
+                <Icon name={editingReview ? 'check' : 'save'} className="h-4 w-4" />
+                {editingReview ? 'Selesai Edit' : 'Edit Pemeriksaan'}
+              </button>
+            )}
+            {canReview && (
+              <>
+                <button
+                  disabled={!!savingReview}
+                  onClick={approveAll}
+                  className="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-[10px] font-extrabold text-white shadow-sm disabled:bg-slate-300"
+                >
+                  <Icon name="check" className="h-4 w-4" />
+                  Setujui Semua
+                </button>
+                <button
+                  disabled={!!savingReview}
+                  onClick={() => {
+                    setEditingReview(true)
+                    setBulkRejectOpen(current => !current)
+                  }}
+                  className="flex items-center gap-2 rounded-xl bg-rose-700 px-4 py-2.5 text-[10px] font-extrabold text-white shadow-sm disabled:bg-slate-300"
+                >
+                  <Icon name="close" className="h-4 w-4" />
+                  Tolak Semua
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => exportPeriodPdf(period, profile, onToast)}
+              className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-[10px] font-extrabold text-emerald-800 shadow-sm"
+            >
+              <Icon name="download" className="h-4 w-4" />
+              Ekspor PDF
+            </button>
+            <OverallPill status={overallStatus(period)} />
+          </div>
+        }
       />
+      {canReview && bulkRejectOpen && (
+        <section className="mb-6 rounded-2xl border border-rose-300 bg-rose-50 p-5 shadow-sm">
+          <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-rose-700">
+            Konfirmasi tolak semua
+          </p>
+          <h2 className="mt-1 text-base font-extrabold text-rose-950">Tulis alasan penolakan laporan</h2>
+          <p className="mt-1 text-[10px] leading-5 text-rose-800">
+            Alasan ini akan diterapkan ke seluruh bagian dan dokumen. Hasil masih berupa draft sampai dikirim.
+          </p>
+          <textarea
+            value={bulkRejectReason}
+            onChange={event => setBulkRejectReason(event.target.value)}
+            maxLength={500}
+            placeholder="Contoh: Data laporan tidak dapat diverifikasi dan harus diajukan ulang..."
+            className="mt-4 min-h-24 w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-xs outline-none focus:border-rose-500"
+          />
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              onClick={rejectAll}
+              className="rounded-lg bg-rose-700 px-4 py-2.5 text-[10px] font-extrabold text-white"
+            >
+              Terapkan Tolak Semua
+            </button>
+            <button
+              onClick={() => setBulkRejectOpen(false)}
+              className="rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-[10px] font-extrabold text-rose-700"
+            >
+              Batal
+            </button>
+          </div>
+        </section>
+      )}
       {readOnly && (
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-xs font-semibold text-slate-600">
-          <Icon name="eye" className="h-4 w-4 text-emerald-700" />
-          Akses akun ini bersifat hanya-baca.
+        <div className={`mb-6 flex items-center gap-3 rounded-xl border p-4 text-xs font-semibold ${
+          canReview ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-slate-200 bg-white text-slate-600'
+        }`}>
+          <Icon name={canReview ? 'lock' : 'eye'} className={`h-4 w-4 ${canReview ? 'text-amber-700' : 'text-emerald-700'}`} />
+          {canReview
+            ? 'Keputusan pemeriksaan sudah tersimpan dan dikunci untuk mencegah salah pencet. Klik Edit Pemeriksaan untuk mengubah keputusan, bagian revisi, atau dokumen keuangan.'
+            : 'Akses akun ini bersifat hanya-baca.'}
         </div>
+      )}
+      {canReview && editingReview && hasFinalDecision && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-950">
+          <Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+          <div>
+            <p className="font-extrabold">Mode edit pemeriksaan aktif</p>
+            <p className="mt-1 leading-5">
+              Perubahan berikutnya menggantikan keputusan aktif sebelumnya. Periksa kembali pilihan sebelum menyimpan keputusan terbaru.
+            </p>
+          </div>
+        </div>
+      )}
+      {!readOnly && (
+        <section className="mb-6 rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+            <div className="flex-1">
+              <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-emerald-700">
+                Draft pemeriksaan
+              </p>
+              <h2 className="mt-1 text-base font-extrabold">Periksa satu per satu, kirim sekaligus</h2>
+              <p className="mt-1 text-[10px] leading-5 text-slate-500">
+                Keputusan setiap bagian hanya disimpan sementara dan belum terlihat oleh awardee sampai tombol kirim ditekan.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-lg bg-emerald-50 px-3 py-2 text-[9px] font-extrabold text-emerald-800">
+                  Bagian: {reviewedSections}/{reportSections.length}
+                </span>
+                <span className="rounded-lg bg-sky-50 px-3 py-2 text-[9px] font-extrabold text-sky-800">
+                  Dokumen: {reviewedFinance}/{period.financeDocuments.length}
+                </span>
+                <span className={`rounded-lg px-3 py-2 text-[9px] font-extrabold ${
+                  reviewComplete ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {reviewComplete ? 'Siap dikirim' : 'Belum lengkap'}
+                </span>
+              </div>
+            </div>
+            <button
+              disabled={!!savingReview || !reviewComplete}
+              onClick={() => void submitAllReviews()}
+              className="rounded-xl bg-emerald-700 px-5 py-3 text-[10px] font-extrabold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              {savingReview ? 'Mengirim...' : 'Kirim Semua Hasil Pemeriksaan'}
+            </button>
+          </div>
+        </section>
       )}
       <div className="grid gap-6 xl:grid-cols-[1.65fr_.8fr]">
         <div className="space-y-5">
           {reportSections.map((section) => {
-            const review = period.sectionReviews[section.key]
+            const review = draftSectionReviews[section.key] ?? period.sectionReviews[section.key]
+            const staged = !!draftSectionReviews[section.key]
             const isReviewing = reviewing === section.key
             return (
               <section
@@ -3591,10 +4063,16 @@ function StaffPeriodDetail({
                     </p>
                   </div>
                   <StatusPill status={review?.status ?? period.reportStatus} />
+                  {staged && !readOnly && (
+                    <span className="rounded-md bg-amber-50 px-2 py-1 text-[8px] font-extrabold text-amber-700">
+                      Draft
+                    </span>
+                  )}
                   {!readOnly && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => approveSection(section.key)}
+                        disabled={!!savingReview}
+                        onClick={() => void approveSection(section.key)}
                         className="rounded-lg bg-emerald-700 px-3 py-2 text-[9px] font-extrabold text-white"
                       >
                         Setujui Bagian
@@ -3602,8 +4080,8 @@ function StaffPeriodDetail({
                       <button
                         onClick={() => {
                           setReviewing(isReviewing ? null : section.key)
-                          setSelectedQuestions([])
-                          setReason('')
+                          setSelectedQuestions(isReviewing ? [] : (review?.issues.map(item => item.questionId) ?? []))
+                          setReason(isReviewing ? '' : (review?.issues[0]?.reason ?? ''))
                         }}
                         className="rounded-lg border border-rose-200 px-3 py-2 text-[9px] font-extrabold text-rose-700"
                       >
@@ -3647,7 +4125,7 @@ function StaffPeriodDetail({
                         </label>
                       ))}
                     </div>
-                    <p className="mt-4 text-[10px] font-extrabold text-rose-800">Pilih alasan</p>
+                    <p className="mt-4 text-[10px] font-extrabold text-rose-800">Alasan perbaikan</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {reviewReasons.map((item) => (
                         <button
@@ -3663,11 +4141,19 @@ function StaffPeriodDetail({
                         </button>
                       ))}
                     </div>
+                    <textarea
+                      value={reason}
+                      onChange={event => setReason(event.target.value)}
+                      maxLength={500}
+                      placeholder="Ketik alasan sendiri atau pilih salah satu opsi di atas..."
+                      className="mt-3 min-h-20 w-full rounded-lg border border-rose-200 bg-white px-3 py-2 text-[10px] outline-none focus:border-rose-500"
+                    />
                     <button
-                      onClick={() => requestRevision(section.key)}
+                      disabled={!!savingReview}
+                      onClick={() => void requestRevision(section.key)}
                       className="mt-4 rounded-lg bg-rose-700 px-4 py-2.5 text-[10px] font-extrabold text-white"
                     >
-                      Simpan Permintaan Perbaikan
+                      Simpan Sementara
                     </button>
                   </div>
                 )}
@@ -3678,61 +4164,89 @@ function StaffPeriodDetail({
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-sm font-extrabold">Pemeriksaan Dokumen Keuangan</h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {period.financeDocuments.map((document) => (
+              {period.financeDocuments.map((document) => {
+                const draftReview = draftFinanceReviews[document.id]
+                const displayedStatus = draftReview?.status ?? document.status
+                const displayedReason = draftReview?.reason ?? document.reason
+                return (
                 <div
                   key={document.id}
                   className={`rounded-xl border p-4 ${
-                    document.status === 'revision'
+                    displayedStatus === 'revision'
                       ? 'border-rose-300 bg-rose-50'
                       : 'border-slate-200'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <Icon name="file" className="h-5 w-5 text-emerald-700" />
-                    <StatusPill status={document.status} />
+                    <div className="flex items-center gap-2">
+                      {draftReview && !readOnly && (
+                        <span className="rounded-md bg-amber-100 px-2 py-1 text-[8px] font-extrabold text-amber-700">Draft</span>
+                      )}
+                      <StatusPill status={displayedStatus} />
+                    </div>
                   </div>
                   <p className="mt-4 truncate text-xs font-extrabold">{document.name}</p>
                   <p className="mt-1 text-[9px] text-slate-400">{formatFileSize(document.size)}</p>
-                  {document.reason && (
+                  {displayedReason && (
                     <p className="mt-3 rounded-lg bg-rose-100 p-2 text-[9px] font-extrabold text-rose-700">
-                      {document.reason}
+                      {displayedReason}
                     </p>
                   )}
                   {!readOnly && (
                     <div className="mt-4">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => updateFinance(document, 'approved')}
+                          disabled={!!savingReview}
+                          onClick={() => void updateFinance(document, 'approved')}
                           className="rounded-lg bg-emerald-700 px-3 py-2 text-[9px] font-extrabold text-white"
                         >
                           Setujui
                         </button>
                         <button
-                          onClick={() =>
+                          onClick={() => {
                             setFinanceReview(financeReview === document.id ? null : document.id)
-                          }
+                            setReason(financeReview === document.id ? '' : (displayedReason ?? ''))
+                          }}
                           className="rounded-lg border border-rose-200 px-3 py-2 text-[9px] font-extrabold text-rose-700"
                         >
                           Perlu Diganti
                         </button>
                       </div>
                       {financeReview === document.id && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {reviewReasons.map((item) => (
-                            <button
-                              key={item}
-                              onClick={() => updateFinance(document, 'revision', item)}
-                              className="rounded-lg border border-rose-200 bg-white px-2.5 py-2 text-[8px] font-bold text-rose-700"
-                            >
-                              {item}
-                            </button>
-                          ))}
+                        <div className="mt-3">
+                          <div className="flex flex-wrap gap-2">
+                            {reviewReasons.map((item) => (
+                              <button
+                                key={item}
+                                disabled={!!savingReview}
+                                onClick={() => setReason(item)}
+                                className="rounded-lg border border-rose-200 bg-white px-2.5 py-2 text-[8px] font-bold text-rose-700"
+                              >
+                                {item}
+                              </button>
+                            ))}
+                          </div>
+                          <textarea
+                            value={reason}
+                            onChange={event => setReason(event.target.value)}
+                            maxLength={500}
+                            placeholder="Ketik alasan penggantian dokumen..."
+                            className="mt-3 min-h-20 w-full rounded-lg border border-rose-200 bg-white px-3 py-2 text-[9px] outline-none focus:border-rose-500"
+                          />
+                          <button
+                            disabled={!!savingReview}
+                            onClick={() => void updateFinance(document, 'revision', reason)}
+                            className="mt-3 rounded-lg bg-rose-700 px-3 py-2 text-[9px] font-extrabold text-white"
+                          >
+                            Simpan Sementara
+                          </button>
                         </div>
                       )}
                     </div>
                   )}
                 </div>
-              ))}
+              )})}
             </div>
           </section>
         </div>
@@ -3853,6 +4367,7 @@ function StatusPill({ status }: { status: ReviewStatus }) {
     review: 'bg-violet-50 text-violet-700',
     revision: 'bg-rose-50 text-rose-700',
     approved: 'bg-emerald-50 text-emerald-700',
+    rejected: 'bg-slate-900 text-white',
   }
   return (
     <span className={`w-fit rounded-full px-2.5 py-1 text-[8px] font-extrabold ${tones[status]}`}>
@@ -3869,6 +4384,8 @@ function OverallPill({ status }: { status: ReturnType<typeof overallStatus> }) {
         ? 'Disetujui'
         : status === 'revision'
           ? 'Perlu perbaikan'
+        : status === 'rejected'
+          ? 'Ditolak'
           : status === 'draft'
             ? 'Belum dikirim'
             : 'Dalam proses'
@@ -3877,6 +4394,8 @@ function OverallPill({ status }: { status: ReturnType<typeof overallStatus> }) {
       ? 'bg-emerald-100 text-emerald-800'
       : status === 'revision'
         ? 'bg-rose-100 text-rose-800'
+        : status === 'rejected'
+          ? 'bg-slate-900 text-white'
         : status === 'incomplete'
           ? 'bg-amber-100 text-amber-800'
           : 'bg-slate-100 text-slate-600'
@@ -3965,6 +4484,7 @@ function formatFileSize(size: number) {
 
 function matrixTone(status: ReturnType<typeof overallStatus>) {
   if (status === 'approved') return 'bg-emerald-600'
+  if (status === 'rejected') return 'bg-slate-800'
   if (status === 'revision') return 'bg-rose-500'
   if (status === 'incomplete') return 'bg-amber-500'
   if (status === 'draft') return 'bg-slate-400'
@@ -4043,11 +4563,17 @@ function DatabasePortal() {
     } : previous)
   }
 
+  const reviewPeriod = async (input: ReportReviewBatchInput) => {
+    const result = await portalRequest<PortalSession>('reviews', 'POST', input)
+    setData(result)
+  }
+
   if (loading) return <div className="grid min-h-screen place-items-center bg-[#f5f6f1] text-sm font-bold text-emerald-800">Menyiapkan SIM-BEZAKAT...</div>
   return <>
     {error && <p role="alert" className="bg-amber-50 p-4 text-center text-sm text-amber-900">{error}</p>}
     {data ? <PortalViews key={data.user.id} account={data.user} state={data.state}
       activePeriod={data.activePeriod} refresh={refresh} logout={() => void logout()}
+      reviewPeriod={reviewPeriod}
       persistDraft={period => writeDraft(period, 'save')}
       clearDraft={period => writeDraft(period, 'clear')} /> : <LoginPage authenticate={async (idBeasiswa, password) => {
         await portalRequest('login', 'POST', {idBeasiswa, password})

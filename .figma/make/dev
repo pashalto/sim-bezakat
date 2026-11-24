@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd sim-bezakat-source
+pnpm generate:importmap || echo "[dev] generate:importmap skipped (Payload backend not connected yet)"
+exec pnpm exec next dev --port "$PORT" --hostname 0.0.0.0

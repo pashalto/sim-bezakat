@@ -37,8 +37,8 @@ try {
   await client.query("SELECT pg_advisory_lock(hashtext('sim_bezakat_migrations'))")
   const {rows:[r]}=await client.query("SELECT to_regclass('sim_bezakat.schema_version') IS NOT NULL AS exists")
   const done=r.exists ? (await client.query('SELECT version FROM sim_bezakat.schema_version')).rows.map(v=>v.version):[]
-  if(done.some(v=>![1,2,3,4,5].includes(v))) throw new Error('SCHEMA_UNKNOWN')
-  for (const [version,file] of [[1,'001_initial.sql'],[2,'002_id_beasiswa.sql'],[3,'003_portal_drafts.sql'],[4,'004_portal_overview.sql'],[5,'005_clear_draft.sql']]) {
+  if(done.some(v=>![1,2,3,4,5,6,7].includes(v))) throw new Error('SCHEMA_UNKNOWN')
+  for (const [version,file] of [[1,'001_initial.sql'],[2,'002_id_beasiswa.sql'],[3,'003_portal_drafts.sql'],[4,'004_portal_overview.sql'],[5,'005_clear_draft.sql'],[6,'006_coordinator_reviews.sql'],[7,'007_edit_coordinator_reviews.sql']]) {
    if(done.includes(version)) { console.log(`Migration ${version} sudah terpasang; dilewati.`); continue }
    await assertTarget(client,true)
    await client.query(await readFile(new URL('../database/migrations/'+file,import.meta.url),'utf8'))

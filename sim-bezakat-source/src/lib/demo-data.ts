@@ -1,7 +1,7 @@
 import { reportSections } from './report-questions'
 
 export type Role = 'awardee' | 'coordinator' | 'institution' | 'ministry'
-export type ReviewStatus = 'draft' | 'submitted' | 'review' | 'revision' | 'approved'
+export type ReviewStatus = 'draft' | 'submitted' | 'review' | 'revision' | 'approved' | 'rejected'
 export type AnswerValue = string | string[]
 
 export type DemoAccount = {
@@ -92,6 +92,7 @@ export type SemesterTranscript = {
 
 export type PeriodRecord = {
   id: string
+  reportId?: string
   ownerId: string
   month: number
   year: number
@@ -139,7 +140,7 @@ export const demoAccounts: DemoAccount[] = [
   },
   {
     id: 'coordinator-nadia',
-    username: 'BZI-251-0000004',
+    username: 'BZI-001-0000001',
     name: 'Nadia Contoh',
     role: 'coordinator',
     roleLabel: 'Koordinator Awardee',
@@ -291,6 +292,7 @@ const period = (
   const reviews = defaultReviews(status === 'approved' ? 'approved' : status)
   return {
     id: `${ownerId}-${year}-${String(month).padStart(2, '0')}`,
+    reportId: `${ownerId}-${year}-${String(month).padStart(2, '0')}`,
     ownerId,
     month,
     year,
@@ -464,12 +466,14 @@ export function statusLabel(status: ReviewStatus) {
     review: 'Menunggu pemeriksaan ulang',
     revision: 'Perlu perbaikan',
     approved: 'Disetujui',
+    rejected: 'Ditolak',
   }
   return labels[status]
 }
 
 export function financeStatus(record: PeriodRecord): ReviewStatus {
   if (!record.financeDocuments.length) return 'draft'
+  if (record.financeDocuments.some((doc) => doc.status === 'rejected')) return 'rejected'
   if (record.financeDocuments.some((doc) => doc.status === 'revision')) return 'revision'
   if (record.financeDocuments.every((doc) => doc.status === 'approved')) return 'approved'
   if (record.financeDocuments.every((doc) => doc.status === 'draft')) return 'draft'
@@ -479,6 +483,7 @@ export function financeStatus(record: PeriodRecord): ReviewStatus {
 
 export function overallStatus(record: PeriodRecord): ReviewStatus | 'incomplete' {
   const finance = financeStatus(record)
+  if (record.reportStatus === 'rejected' || finance === 'rejected') return 'rejected'
   if (record.reportStatus === 'revision' || finance === 'revision') return 'revision'
   if (record.reportStatus === 'approved' && finance === 'approved') return 'approved'
   if (record.reportStatus === 'draft' && finance === 'draft') return 'draft'
