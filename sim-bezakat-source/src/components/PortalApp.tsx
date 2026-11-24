@@ -3444,6 +3444,54 @@ function escapePdfText(value: unknown) {
     .replaceAll("'", '&#039;')
 }
 
+function pdfValue(value: unknown) {
+  if (value === undefined || value === null || value === '') return '—'
+  return escapePdfText(value)
+}
+
+function pdfSelectedValues(value?: AnswerValue) {
+  if (Array.isArray(value)) return new Set(value)
+  return new Set(value ? [value] : [])
+}
+
+function renderPdfQuestion(
+  question: ReportQuestion,
+  value: AnswerValue | undefined,
+  number: string,
+  issue?: string,
+) {
+  const selected = pdfSelectedValues(value)
+  const options = question.options ?? []
+  const answer = Array.isArray(value) ? value.join(', ') : value
+  const answerHtml = options.length
+    ? `<div class="choices">${options.map(option => (
+        `<span class="choice"><span class="box">${selected.has(option) ? '☒' : '☐'}</span>${escapePdfText(option)}</span>`
+      )).join('')}</div>`
+    : `<div class="narrative">${pdfValue(answer)}</div>`
+
+  return `<article class="question">
+    <div class="question-title"><span class="question-number">${escapePdfText(number)}.</span><span>${escapePdfText(question.label)}</span></div>
+    ${question.hint ? `<p class="hint">${escapePdfText(question.hint)}</p>` : ''}
+    ${answerHtml}
+    ${issue ? `<div class="review-note"><strong>Catatan pemeriksa:</strong> ${escapePdfText(issue)}</div>` : ''}
+  </article>`
+}
+
+function safePdfPhotoUrl(photoUrl: string) {
+  if (!photoUrl) return ''
+  if (/^data:image\/(?:png|jpe?g|gif|webp);base64,/i.test(photoUrl) || photoUrl.startsWith('blob:')) {
+    return photoUrl
+  }
+  try {
+    const resolved = new URL(photoUrl, window.location.href)
+    return resolved.origin === window.location.origin && /^https?:$/.test(resolved.protocol)
+      ? resolved.href
+      : ''
+  } catch {
+    return ''
+  }
+}
+
 function exportPeriodPdf(
   period: PeriodRecord,
   profile: DemoProfile,
@@ -3454,58 +3502,164 @@ function exportPeriodPdf(
     onToast('Izinkan pop-up untuk mengekspor PDF.')
     return
   }
-  const profileRows = [
-    ['Nama lengkap', profile.fullName],
-    ['Nomor registrasi', profile.registrationNumber],
-    ['Perguruan tinggi', profile.university],
-    ['Program studi', profile.studyProgram],
-    ['NIM', profile.studentNumber],
-    ['Status beasiswa', profile.scholarshipStatus],
-    ['Indeks prestasi', `${profile.gpaType} ${profile.gpaValue} · ${profile.gpaSemester}`],
+  const reportProfile = period.profileSnapshot ?? profile
+  const identityRows = [
+    ['Nama lengkap', reportProfile.fullName],
+    ['Tempat, tanggal lahir', `${reportProfile.birthPlace || '—'}, ${reportProfile.birthDate || '—'}`],
+    ['Jenis kelamin', reportProfile.gender],
+    ['Alamat sesuai identitas', reportProfile.identityAddress],
+    ['Jenis domisili', reportProfile.domicileType],
+    ['Alamat domisili', reportProfile.domicileAddress],
+    ['Nama orang tua/wali', reportProfile.guardianName],
+    ['Kontak orang tua/wali', reportProfile.guardianContact],
+    ['Media sosial', reportProfile.socialMedia],
   ]
-  const answerRows = reportSections.flatMap(section => [
-    `<tr class="section"><th colspan="2">${escapePdfText(section.label)}</th></tr>`,
-    ...section.questions.map(question => {
-      const value = period.answers[question.id]
-      const answer = Array.isArray(value) ? value.join(', ') : value
-      const issue = period.sectionReviews[section.key]?.issues.find(item => item.questionId === question.id)
-      return `<tr><td>${escapePdfText(question.label)}</td><td>${escapePdfText(answer)}${
-        issue ? `<p class="note">Catatan: ${escapePdfText(issue.reason)}</p>` : ''
-      }</td></tr>`
-    }),
-  ]).join('')
+  const studentRows = [
+    ['Perguruan tinggi', reportProfile.university],
+    ['Program studi', reportProfile.studyProgram],
+    ['Nomor induk mahasiswa', reportProfile.studentNumber],
+    ['Nomor registrasi BeZakat', reportProfile.registrationNumber],
+    ['Lembaga penyantun', reportProfile.sponsor],
+    ['Status beasiswa', reportProfile.scholarshipStatus],
+    ['Indeks prestasi', `${reportProfile.gpaType} ${reportProfile.gpaValue || '—'}`],
+    ['Periode indeks prestasi', reportProfile.gpaSemester],
+    ['Riwayat indeks prestasi', reportProfile.gpaHistory.length
+      ? reportProfile.gpaHistory.map((item, index) => `S${index + 1}: ${item || '—'}`).join(' · ')
+      : '—'],
+  ]
+  const renderRows = (rows: (string | undefined)[][]) => rows.map(([label, value], index) => (
+    `<tr><td class="row-number">${index + 1}</td><th>${escapePdfText(label)}</th><td>${pdfValue(value)}</td></tr>`
+  )).join('')
+  const summarySection = reportSections.find(section => section.key === 'ringkasan')
+  const assessmentSections = reportSections.filter(section => section.key !== 'ringkasan')
+  const summaryQuestion = summarySection?.questions[0]
+  const summaryIssue = period.sectionReviews.ringkasan?.issues.find(
+    item => item.questionId === summaryQuestion?.id,
+  )?.reason
+  const sectionLetters = ['D', 'E', 'F', 'G', 'H', 'I', 'J']
+  const assessmentHtml = assessmentSections.map((section, sectionIndex) => {
+    const review = period.sectionReviews[section.key]
+    return `<section class="report-section">
+      <div class="section-heading">
+        <span>${sectionLetters[sectionIndex]}.</span>
+        <div><h2>${escapePdfText(section.label.toUpperCase())}</h2><p>${escapePdfText(section.description)}</p></div>
+        <span class="section-status">${escapePdfText(statusLabel(review?.status ?? 'draft'))}</span>
+      </div>
+      <div class="question-list">${section.questions.map((question, questionIndex) => {
+        const issue = review?.issues.find(item => item.questionId === question.id)?.reason
+        return renderPdfQuestion(
+          question,
+          period.answers[question.id],
+          `${sectionLetters[sectionIndex]}.${questionIndex + 1}`,
+          issue,
+        )
+      }).join('')}</div>
+    </section>`
+  }).join('')
   const activities = period.activities.length
-    ? period.activities.map(activity => `<tr><td>${escapePdfText(activity.name)}</td><td>${
-        escapePdfText(`${activity.type} · ${activity.role} · ${activity.description}`)
-      }</td></tr>`).join('')
-    : '<tr><td colspan="2">Tidak ada kegiatan organisasi.</td></tr>'
+    ? period.activities.map((activity, index) => `<tr>
+        <td class="row-number">${index + 1}</td>
+        <td><strong>${escapePdfText(activity.name)}</strong><br><span class="muted">${escapePdfText(activity.type)} · ${escapePdfText(activity.role)}</span></td>
+        <td>${pdfValue(activity.description)}</td>
+        <td>${pdfValue(activity.evidence)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Tidak ada kegiatan organisasi atau kepanitiaan.</td></tr>'
   const finance = period.financeDocuments.length
-    ? period.financeDocuments.map(document => `<tr><td>${escapePdfText(
-        document.category === 'current' ? 'Realisasi bulan berjalan' : 'Rencana bulan berikutnya',
-      )}</td><td>${escapePdfText(document.name)} · ${escapePdfText(statusLabel(document.status))}${
-        document.reason ? `<p class="note">Catatan: ${escapePdfText(document.reason)}</p>` : ''
-      }</td></tr>`).join('')
-    : '<tr><td colspan="2">Belum ada dokumen keuangan.</td></tr>'
+    ? period.financeDocuments.map((document, index) => `<tr>
+        <td class="row-number">${index + 1}</td>
+        <td>${escapePdfText(document.category === 'current' ? 'Realisasi bulan berjalan' : 'Rencana bulan berikutnya')}</td>
+        <td>${escapePdfText(document.name)}<br><span class="muted">${escapePdfText(formatFileSize(document.size))} · diunggah ${escapePdfText(formatDateTime(document.uploadedAt))}</span></td>
+        <td><span class="document-status">${escapePdfText(statusLabel(document.status))}</span>${document.reason
+          ? `<div class="review-note compact"><strong>Catatan:</strong> ${escapePdfText(document.reason)}</div>`
+          : ''}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Belum ada dokumen keuangan.</td></tr>'
+  const history = period.reviewHistory.length
+    ? period.reviewHistory.map((event, index) => `<tr>
+        <td class="row-number">${index + 1}</td>
+        <td>${escapePdfText(formatDateTime(event.date))}</td>
+        <td>${escapePdfText(event.actor)}</td>
+        <td>${escapePdfText(event.text)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Belum ada riwayat pemeriksaan.</td></tr>'
   const exportedStatus = overallStatus(period)
   const exportedStatusLabel = exportedStatus === 'incomplete' ? 'Belum lengkap' : statusLabel(exportedStatus)
+  const photoUrl = safePdfPhotoUrl(profile.photoUrl)
+  const photo = photoUrl
+    ? `<img class="profile-photo" src="${escapePdfText(photoUrl)}" alt="Foto terbaru ${escapePdfText(reportProfile.fullName)}">`
+    : `<div class="photo-placeholder"><span>FOTO TERBARU</span><small>Belum tersedia</small></div>`
+  const submittedAt = period.submittedAt ? formatDateTime(period.submittedAt) : 'Belum dikirim'
+  const generatedAt = new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })
+
   popup.document.write(`<!doctype html>
 <html lang="id"><head><meta charset="utf-8"><title>SIM-BEZAKAT · ${escapePdfText(periodLabel(period.month, period.year))}</title>
 <style>
-@page{size:A4;margin:18mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#17352b;font-size:10px;line-height:1.5;margin:0}
-h1{font-size:22px;margin:0 0 4px}h2{font-size:14px;margin:24px 0 8px;padding-bottom:5px;border-bottom:2px solid #167c5a}
-.meta{color:#62756e;margin-bottom:20px}.badge{display:inline-block;padding:4px 9px;border-radius:99px;background:#e8f5ef;color:#126448;font-weight:700}
-table{width:100%;border-collapse:collapse;page-break-inside:auto}tr{page-break-inside:avoid}td,th{border:1px solid #dce6e1;padding:7px;text-align:left;vertical-align:top}
-td:first-child{width:34%;font-weight:700;background:#f7faf8}.section th{background:#dff2e9;color:#114f3b;font-size:11px}
-.note{margin:5px 0 0;padding:5px 7px;background:#fff1f1;color:#9a3030;font-weight:700}.footer{margin-top:24px;color:#71817b;font-size:8px}
-@media print{.no-print{display:none}}
+@page{size:A4;margin:14mm 14mm 16mm}*{box-sizing:border-box}html{background:#edf3f0}body{width:210mm;min-height:297mm;margin:0 auto;background:#fff;color:#17251f;font-family:Arial,Helvetica,sans-serif;font-size:9.2pt;line-height:1.45;padding:14mm}
+h1,h2,p{margin:0}.document-header{border-top:8px solid #126448;border-bottom:2px solid #126448;padding:12px 0 10px;text-align:center}.kicker{font-size:8pt;font-weight:700;letter-spacing:1.8px;color:#126448}.document-header h1{max-width:150mm;margin:6px auto 3px;font-size:17pt;line-height:1.25}.period-title{font-size:11pt;font-weight:700;color:#3c554b}
+.cover-grid{display:grid;grid-template-columns:38mm 1fr;gap:12mm;align-items:center;margin:16mm 0 10mm}.profile-photo,.photo-placeholder{width:38mm;height:50mm;border:1.5px solid #126448}.profile-photo{display:block;object-fit:cover}.photo-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f2f7f4;color:#507066;font-weight:700;letter-spacing:.7px}.photo-placeholder small{margin-top:5px;font-size:7pt;font-weight:400;letter-spacing:0}.cover-name{font-size:19pt;line-height:1.2;color:#103e2f}.cover-registration{margin-top:5px;font-size:10pt;color:#52665e}.cover-meta{display:grid;grid-template-columns:42mm 1fr;margin-top:12px;border-top:1px solid #cbd8d2}.cover-meta dt,.cover-meta dd{margin:0;padding:5px 0;border-bottom:1px solid #cbd8d2}.cover-meta dt{font-weight:700}.status-pill{display:inline-block;border:1px solid #126448;background:#e7f3ed;color:#126448;padding:2px 7px;font-weight:700;text-transform:uppercase;font-size:7.5pt}
+.document-note{margin:8mm 0 12mm;padding:7px 9px;border-left:3px solid #126448;background:#f2f7f4;color:#40564d;font-size:8pt}.section-heading{display:grid;grid-template-columns:8mm 1fr auto;gap:2mm;align-items:start;margin:8mm 0 3mm;padding:6px 7px;background:#126448;color:#fff;break-after:avoid}.section-heading>span:first-child,.section-heading h2{font-size:10.5pt;font-weight:700}.section-heading p{margin-top:2px;font-size:7.5pt;color:#dcece5}.section-status{align-self:center;border:1px solid #bad8ca;padding:2px 5px;font-size:7pt;font-weight:700;text-transform:uppercase}
+table{width:100%;border-collapse:collapse}.form-table tr,.evidence-table tr{break-inside:avoid}.form-table th,.form-table td,.evidence-table th,.evidence-table td{border:1px solid #8ca39a;padding:5px 6px;text-align:left;vertical-align:top}.form-table th{width:35%;background:#eef5f1;font-weight:700}.row-number{width:8mm!important;text-align:center!important;background:#f7faf8!important;font-weight:700}.evidence-table thead th{background:#dcece5;color:#153e31}.evidence-table .empty{text-align:center;padding:12px;color:#64776f}.muted{color:#64776f;font-size:7.5pt}
+.question-list{border:1px solid #8ca39a;border-bottom:0}.question{padding:7px 8px;border-bottom:1px solid #8ca39a;break-inside:avoid}.question-title{display:flex;gap:5px;font-weight:700}.question-number{min-width:11mm;color:#126448}.hint{margin:3px 0 0 13mm;color:#687b73;font-size:7.5pt;font-style:italic}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 10px;margin:6px 0 0 13mm}.choice{display:flex;align-items:flex-start;gap:4px}.box{font-family:"Arial Unicode MS","Segoe UI Symbol",Arial,sans-serif;color:#126448;font-size:11pt;line-height:1}.narrative{min-height:13mm;margin:6px 0 0 13mm;padding:6px 7px;border:1px solid #b7c8c0;background:#fbfcfb;white-space:pre-wrap}.review-note{margin:6px 0 0 13mm;padding:5px 7px;border-left:3px solid #b42318;background:#fff0ee;color:#7a271a;font-size:8pt}.review-note.compact{margin:4px 0 0;padding:4px 5px}.summary-box{min-height:28mm;padding:9px;border:1px solid #8ca39a;background:#fbfcfb;white-space:pre-wrap}.summary-meta{display:flex;gap:14px;margin-top:5px;color:#52665e;font-size:7.5pt}
+.signoff{display:grid;grid-template-columns:1fr 58mm;gap:12mm;margin-top:10mm;break-inside:avoid}.signoff-note{color:#52665e;font-size:8pt}.signature{text-align:center}.signature-space{height:20mm}.footer{margin-top:12mm;padding-top:5px;border-top:1px solid #9eb0a8;color:#667970;font-size:7pt;text-align:center}
+.no-print{position:fixed;z-index:10;right:18px;top:18px;padding:11px 16px;border:0;border-radius:7px;background:#126448;color:#fff;font-weight:700;box-shadow:0 6px 18px #0003;cursor:pointer}
+@media print{html,body{background:#fff}body{width:auto;min-height:0;margin:0;padding:0}.no-print{display:none}.report-section{break-before:auto}.section-heading{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 </style></head><body>
-<button class="no-print" onclick="window.print()" style="position:fixed;right:18px;top:18px;padding:10px 16px;border:0;border-radius:8px;background:#126448;color:white;font-weight:700">Simpan sebagai PDF</button>
-<header><span class="badge">Rekap laporan bulanan</span><h1>SIM-BEZAKAT</h1><p class="meta">${escapePdfText(periodLabel(period.month, period.year))} · ${escapePdfText(profile.fullName)} · ${escapePdfText(exportedStatusLabel)}</p></header>
-<h2>1. Profil Diri</h2><table>${profileRows.map(([label,value]) => `<tr><td>${escapePdfText(label)}</td><td>${escapePdfText(value)}</td></tr>`).join('')}</table>
-<h2>2. Laporan Bulanan</h2><table>${answerRows}</table>
-<h2>Aktivitas Organisasi</h2><table>${activities}</table>
-<h2>3. Laporan Keuangan</h2><table>${finance}</table>
-<p class="footer">Dokumen dibuat dari data laporan SIM-BEZAKAT pada ${escapePdfText(new Date().toLocaleString('id-ID'))}.</p>
+<button class="no-print" onclick="window.print()">Simpan sebagai PDF</button>
+<header class="document-header">
+  <p class="kicker">SISTEM INFORMASI MANAJEMEN BEASISWA ZAKAT INDONESIA</p>
+  <h1>LAPORAN ASESMEN BULANAN<br>PENERIMA BEASISWA ZAKAT INDONESIA</h1>
+  <p class="period-title">Periode ${escapePdfText(periodLabel(period.month, period.year))}</p>
+</header>
+<section class="cover-grid">
+  ${photo}
+  <div>
+    <p class="kicker">IDENTITAS PENERIMA BEASISWA</p>
+    <h2 class="cover-name">${escapePdfText(reportProfile.fullName)}</h2>
+    <p class="cover-registration">${escapePdfText(reportProfile.registrationNumber)} · ${escapePdfText(reportProfile.university)}</p>
+    <dl class="cover-meta">
+      <dt>Periode asesmen</dt><dd>${escapePdfText(periodLabel(period.month, period.year))}</dd>
+      <dt>Tanggal pengiriman</dt><dd>${escapePdfText(submittedAt)}</dd>
+      <dt>Status laporan</dt><dd><span class="status-pill">${escapePdfText(exportedStatusLabel)}</span></dd>
+      <dt>Dana diterima</dt><dd>${period.allowanceReceived === undefined ? '—' : period.allowanceReceived ? 'Ya' : 'Tidak'}</dd>
+    </dl>
+  </div>
+</section>
+<p class="document-note">Dokumen ini memuat data profil, jawaban asesmen, bukti kegiatan, laporan keuangan, serta hasil pemeriksaan koordinator sesuai data yang tersimpan pada SIM-BEZAKAT.</p>
+
+<section>
+  <div class="section-heading"><span>A.</span><div><h2>IDENTITAS DIRI</h2><p>Data pribadi penerima Beasiswa Zakat Indonesia</p></div></div>
+  <table class="form-table"><tbody>${renderRows(identityRows)}</tbody></table>
+</section>
+<section>
+  <div class="section-heading"><span>B.</span><div><h2>DATA KEMAHASISWAAN</h2><p>Data akademik dan kepesertaan program beasiswa</p></div></div>
+  <table class="form-table"><tbody>${renderRows(studentRows)}</tbody></table>
+</section>
+<section>
+  <div class="section-heading"><span>C.</span><div><h2>KABAR BULAN INI</h2><p>Ringkasan asesmen penerima beasiswa pada periode pelaporan</p></div><span class="section-status">${escapePdfText(statusLabel(period.sectionReviews.ringkasan?.status ?? 'draft'))}</span></div>
+  <div class="summary-box">${summaryQuestion ? pdfValue(period.answers[summaryQuestion.id]) : '—'}</div>
+  ${summaryIssue ? `<div class="review-note"><strong>Catatan pemeriksa:</strong> ${escapePdfText(summaryIssue)}</div>` : ''}
+  <div class="summary-meta"><span>Periode: ${escapePdfText(periodLabel(period.month, period.year))}</span><span>Status: ${escapePdfText(exportedStatusLabel)}</span></div>
+</section>
+
+${assessmentHtml}
+
+<section>
+  <div class="section-heading"><span>K.</span><div><h2>RINCIAN AKTIVITAS ORGANISASI</h2><p>Kegiatan, peran, deskripsi, dan bukti pendukung</p></div></div>
+  <table class="evidence-table"><thead><tr><th>No.</th><th>Kegiatan & peran</th><th>Uraian</th><th>Bukti</th></tr></thead><tbody>${activities}</tbody></table>
+</section>
+<section>
+  <div class="section-heading"><span>L.</span><div><h2>LAPORAN KEUANGAN & LAMPIRAN</h2><p>Dokumen realisasi dan rencana penggunaan dana</p></div></div>
+  <table class="evidence-table"><thead><tr><th>No.</th><th>Kategori</th><th>Dokumen</th><th>Hasil pemeriksaan</th></tr></thead><tbody>${finance}</tbody></table>
+</section>
+<section>
+  <div class="section-heading"><span>M.</span><div><h2>HASIL & RIWAYAT PEMERIKSAAN</h2><p>Jejak keputusan dan catatan koordinator</p></div><span class="section-status">${escapePdfText(exportedStatusLabel)}</span></div>
+  <table class="evidence-table"><thead><tr><th>No.</th><th>Waktu</th><th>Pemeriksa</th><th>Catatan/keputusan</th></tr></thead><tbody>${history}</tbody></table>
+</section>
+<section class="signoff">
+  <p class="signoff-note">Laporan ini dihasilkan secara elektronik dari SIM-BEZAKAT. Status dan catatan pemeriksaan pada dokumen mengikuti data terakhir saat ekspor.</p>
+  <div class="signature"><p>${escapePdfText(new Date().toLocaleDateString('id-ID', { dateStyle: 'long' }))}</p><p>Koordinator Awardee</p><div class="signature-space"></div><p><strong>( .................................... )</strong></p></div>
+</section>
+<p class="footer">Dokumen SIM-BEZAKAT · Diekspor pada ${escapePdfText(generatedAt)} · ${escapePdfText(reportProfile.registrationNumber)}</p>
 </body></html>`)
   popup.document.close()
   onToast('Dokumen PDF siap dicetak atau disimpan.')
