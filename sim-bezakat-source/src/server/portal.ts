@@ -6,6 +6,7 @@ import { compare, hash } from 'bcryptjs'
 import { withDatabase } from './database'
 import { reportSections, exclusiveOptions } from '@/lib/report-questions'
 import type { PortalUser, StoredDraft } from '@/lib/portal-contract'
+import type { ReportReviewInput } from '@/lib/portal-contract'
 
 export class PortalError extends Error { constructor(public status:number,message:string){super(message)} }
 export function json(data:unknown,status=200){return Response.json(data,{status,headers:{'Cache-Control':'no-store'}})}
@@ -118,5 +119,52 @@ export async function clearDraft(user: PortalUser, value: unknown) {
       'SELECT sim_bezakat.portal_hapus_isian_draf($1,$2,$3) AS draft', [user.id, value.periodId, value.version],
     )
     return result.rows[0].draft
+  })
+}
+
+const reviewOperations = new Set<ReportReviewInput['operation']>([
+  'approve-section', 'revise-section', 'approve-finance', 'revise-finance',
+])
+export async function reviewReport(user: PortalUser, value: unknown) {
+  if (user.role !== 'coordinator') throw new PortalError(403, 'Hanya koordinator dapat memeriksa laporan.')
+  if (!object(value)) throw new PortalError(400, 'Pemeriksaan tidak valid.')
+  const reportId = value.reportId
+  const operation = value.operation
+  const target = value.target
+  const issues = value.issues
+  if (typeof reportId !== 'string' || !/^-?\d{1,18}$/.test(reportId) ||
+      typeof operation !== 'string' || !reviewOperations.has(operation as ReportReviewInput['operation']) ||
+      typeof target !== 'string' || target.length > 80) {
+    throw new PortalError(400, 'Target pemeriksaan tidak valid.')
+  }
+  const sectionKeys = reportSections.map(section => section.key)
+  if (operation.endsWith('section') && !sectionKeys.includes(target)) {
+    throw new PortalError(400, 'Bagian laporan tidak dikenal.')
+  }
+  let cleanIssues: ReportReviewInput['issues'] = []
+  if (operation.startsWith('revise')) {
+    if (!Array.isArray(issues) || issues.length === 0 || issues.length > 40) {
+      throw new PortalError(400, 'Catatan revisi wajib diisi.')
+    }
+    cleanIssues = issues.map(issue => {
+      if (!object(issue) || typeof issue.questionId !== 'string' || typeof issue.reason !== 'string' ||
+          issue.questionId.length > 100 || !issue.reason.trim() || issue.reason.length > 500) {
+        throw new PortalError(400, 'Rincian revisi tidak valid.')
+      }
+      return { questionId: issue.questionId, reason: issue.reason.trim() }
+    })
+    if (operation === 'revise-section') {
+      const section = reportSections.find(item => item.key === target)
+      if (cleanIssues.some(issue => !section?.questions.some(question => question.id === issue.questionId))) {
+        throw new PortalError(400, 'Isian revisi tidak termasuk bagian yang dipilih.')
+      }
+    }
+  }
+  return withDatabase(async client => {
+    const { rows: [row] } = await client.query<{detail: unknown}>(
+      'SELECT sim_bezakat.portal_simpan_pemeriksaan($1,$2,$3,$4,$5::jsonb) AS detail',
+      [user.id, reportId, operation, target, JSON.stringify(cleanIssues)],
+    )
+    return row.detail
   })
 }

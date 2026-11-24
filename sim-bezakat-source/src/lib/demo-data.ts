@@ -92,6 +92,7 @@ export type SemesterTranscript = {
 
 export type PeriodRecord = {
   id: string
+  reportId?: string
   ownerId: string
   month: number
   year: number
@@ -291,6 +292,7 @@ const period = (
   const reviews = defaultReviews(status === 'approved' ? 'approved' : status)
   return {
     id: `${ownerId}-${year}-${String(month).padStart(2, '0')}`,
+    reportId: `${ownerId}-${year}-${String(month).padStart(2, '0')}`,
     ownerId,
     month,
     year,
