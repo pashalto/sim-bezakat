@@ -52,7 +52,7 @@ Buka alamat lokal yang ditampilkan di terminal. Untuk mengedit portal sambil mel
 | Peran | ID fiktif setelah seed |
 | --- | --- |
 | Awardee | BZI-251-0000001 |
-| Koordinator | BZI-251-0000004 |
+| Koordinator | BZI-001-0000001 |
 | Pengelola LAZ | BZI-251-0000005 |
 | Pengelola Kemenag | BZI-251-0000006 |
 

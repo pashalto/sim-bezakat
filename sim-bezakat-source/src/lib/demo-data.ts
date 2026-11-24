@@ -140,7 +140,7 @@ export const demoAccounts: DemoAccount[] = [
   },
   {
     id: 'coordinator-nadia',
-    username: 'BZI-251-0000004',
+    username: 'BZI-001-0000001',
     name: 'Nadia Contoh',
     role: 'coordinator',
     roleLabel: 'Koordinator Awardee',
