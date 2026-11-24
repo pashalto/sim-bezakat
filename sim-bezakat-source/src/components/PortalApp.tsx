@@ -3690,7 +3690,10 @@ function StaffPeriodDetail({
   const [financeReview, setFinanceReview] = useState<string | null>(null)
   const [savingReview, setSavingReview] = useState('')
   const [decisionNote, setDecisionNote] = useState('')
-  const readOnly = account.role !== 'coordinator' || !['submitted', 'review'].includes(period.reportStatus)
+  const hasFinalDecision = ['revision', 'approved', 'rejected'].includes(period.reportStatus)
+  const [editingReview, setEditingReview] = useState(!hasFinalDecision)
+  const canReview = account.role === 'coordinator'
+  const readOnly = !canReview || !editingReview
 
   const saveConnectedReview = async (input: Omit<ReportReviewInput, 'reportId'>, success: string) => {
     if (!persistReview) return false
@@ -3705,6 +3708,7 @@ function StaffPeriodDetail({
       setFinanceReview(null)
       setSelectedQuestions([])
       setReason('')
+      if (input.target === 'report') setEditingReview(false)
       onToast(success)
     } catch (error) {
       onToast(error instanceof Error ? error.message : 'Pemeriksaan gagal disimpan.')
@@ -3757,6 +3761,7 @@ function StaffPeriodDetail({
       }],
     })
     setDecisionNote('')
+    setEditingReview(false)
     onToast(success)
   }
 
@@ -3881,6 +3886,26 @@ function StaffPeriodDetail({
         }
         action={
           <div className="flex flex-wrap items-center gap-2">
+            {canReview && hasFinalDecision && (
+              <button
+                onClick={() => {
+                  setEditingReview(current => !current)
+                  setReviewing(null)
+                  setFinanceReview(null)
+                  setSelectedQuestions([])
+                  setReason('')
+                  setDecisionNote('')
+                }}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-[10px] font-extrabold shadow-sm ${
+                  editingReview
+                    ? 'border border-slate-200 bg-white text-slate-700'
+                    : 'bg-amber-500 text-white'
+                }`}
+              >
+                <Icon name={editingReview ? 'check' : 'save'} className="h-4 w-4" />
+                {editingReview ? 'Selesai Edit' : 'Edit Pemeriksaan'}
+              </button>
+            )}
             <button
               onClick={() => exportPeriodPdf(period, profile, onToast)}
               className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-[10px] font-extrabold text-emerald-800 shadow-sm"
@@ -3893,9 +3918,24 @@ function StaffPeriodDetail({
         }
       />
       {readOnly && (
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-xs font-semibold text-slate-600">
-          <Icon name="eye" className="h-4 w-4 text-emerald-700" />
-          Akses akun ini bersifat hanya-baca.
+        <div className={`mb-6 flex items-center gap-3 rounded-xl border p-4 text-xs font-semibold ${
+          canReview ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-slate-200 bg-white text-slate-600'
+        }`}>
+          <Icon name={canReview ? 'lock' : 'eye'} className={`h-4 w-4 ${canReview ? 'text-amber-700' : 'text-emerald-700'}`} />
+          {canReview
+            ? 'Keputusan pemeriksaan sudah tersimpan dan dikunci untuk mencegah salah pencet. Klik Edit Pemeriksaan untuk mengubah keputusan, bagian revisi, atau dokumen keuangan.'
+            : 'Akses akun ini bersifat hanya-baca.'}
+        </div>
+      )}
+      {canReview && editingReview && hasFinalDecision && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-950">
+          <Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+          <div>
+            <p className="font-extrabold">Mode edit pemeriksaan aktif</p>
+            <p className="mt-1 leading-5">
+              Perubahan berikutnya menggantikan keputusan aktif sebelumnya. Periksa kembali pilihan sebelum menyimpan keputusan terbaru.
+            </p>
+          </div>
         </div>
       )}
       {!readOnly && (
@@ -3969,8 +4009,8 @@ function StaffPeriodDetail({
                       <button
                         onClick={() => {
                           setReviewing(isReviewing ? null : section.key)
-                          setSelectedQuestions([])
-                          setReason('')
+                          setSelectedQuestions(isReviewing ? [] : (review?.issues.map(item => item.questionId) ?? []))
+                          setReason(isReviewing ? '' : (review?.issues[0]?.reason ?? ''))
                         }}
                         className="rounded-lg border border-rose-200 px-3 py-2 text-[9px] font-extrabold text-rose-700"
                       >
@@ -4030,6 +4070,11 @@ function StaffPeriodDetail({
                         </button>
                       ))}
                     </div>
+                    {reason && !reviewReasons.includes(reason) && (
+                      <p className="mt-2 rounded-lg border border-rose-200 bg-white px-3 py-2 text-[9px] font-semibold text-rose-700">
+                        Alasan tersimpan: {reason}
+                      </p>
+                    )}
                     <button
                       disabled={!!savingReview}
                       onClick={() => void requestRevision(section.key)}

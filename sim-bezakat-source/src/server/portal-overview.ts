@@ -23,6 +23,7 @@ type ReviewProgress = {
   detail: {
     sections?: PeriodRecord['sectionReviews']
     finance?: Record<string, { status: ReviewStatus; issues?: Array<{reason?: string}> }>
+    decision?: { status?: ReviewStatus; issues?: Array<{questionId?: string; reason?: string}> }
   }
 }
 
@@ -64,6 +65,10 @@ export async function portalSession(user: PortalUser): Promise<PortalSession> {
     const periods = source.map((entry): PeriodRecord => {
       const details = overview.reports.find(r => r.ownerId === entry.ownerId && r.periodId === entry.periodId)
       const review = details ? reviews.find(item => item.reportId === details.reportId)?.detail : undefined
+      const workflowStatus = statuses[entry.status]
+      const reportStatus = workflowStatus === 'submitted'
+        ? review?.decision?.status ?? workflowStatus
+        : workflowStatus
       const financeDocuments = (details?.financeDocuments ?? []).map(document => {
         const financeReview = review?.finance?.[document.id]
         return financeReview ? {
@@ -75,7 +80,7 @@ export async function portalSession(user: PortalUser): Promise<PortalSession> {
       return {
         id: user.role === 'awardee' ? entry.periodId : `${entry.ownerId}:${entry.periodId}`,
         reportId: details?.reportId,
-        ownerId: entry.ownerId, year: entry.year, month: entry.month, reportStatus: statuses[entry.status],
+        ownerId: entry.ownerId, year: entry.year, month: entry.month, reportStatus,
         answers: entry.answers, activities: entry.activities, sectionReviews: review?.sections ?? {},
         financeDocuments, reviewHistory: details?.reviewHistory ?? [],
         submittedAt: details?.submittedAt,
