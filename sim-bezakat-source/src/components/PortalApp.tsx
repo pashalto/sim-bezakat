@@ -3708,7 +3708,13 @@ function StaffPeriodDetail({
       setFinanceReview(null)
       setSelectedQuestions([])
       setReason('')
-      if (input.target === 'report') setEditingReview(false)
+      if (
+        input.operation === 'approve-report' ||
+        input.operation === 'reject-report' ||
+        input.operation.startsWith('revise-')
+      ) {
+        setEditingReview(false)
+      }
       onToast(success)
     } catch (error) {
       onToast(error instanceof Error ? error.message : 'Pemeriksaan gagal disimpan.')
@@ -3824,6 +3830,7 @@ function StaffPeriodDetail({
     setReviewing(null)
     setSelectedQuestions([])
     setReason('')
+    setEditingReview(false)
     onToast('Permintaan perbaikan berhasil disimpan.')
   }
 
@@ -3843,6 +3850,7 @@ function StaffPeriodDetail({
     }, status === 'approved' ? 'Dokumen keuangan disetujui.' : 'Permintaan penggantian dikirim ke awardee.')) return
     updatePeriod({
       ...period,
+      reportStatus: status === 'revision' ? 'revision' : period.reportStatus,
       financeDocuments: period.financeDocuments.map((item) =>
         item.id === document.id
           ? { ...item, status, reason: status === 'revision' ? selectedReason : undefined }
@@ -3861,6 +3869,7 @@ function StaffPeriodDetail({
       ],
     })
     setFinanceReview(null)
+    if (status === 'revision') setEditingReview(false)
     onToast(
       status === 'approved'
         ? 'Dokumen keuangan disetujui.'
@@ -3881,7 +3890,9 @@ function StaffPeriodDetail({
         title={periodLabel(period.month, period.year)}
         description={
           readOnly
-            ? 'Mode monitoring hanya-baca. Jawaban awardee tidak dapat diubah.'
+            ? canReview
+              ? 'Pemeriksaan dikunci setelah keputusan tersimpan. Aktifkan Edit Pemeriksaan untuk melakukan koreksi.'
+              : 'Mode monitoring hanya-baca. Jawaban awardee tidak dapat diubah.'
             : 'Setujui laporan per subbab atau tandai isian tertentu untuk diperbaiki.'
         }
         action={
