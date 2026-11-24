@@ -1,0 +1,8 @@
+{
+  "installOn": [
+    "sim-bezakat-source/package.json",
+    "sim-bezakat-source/pnpm-lock.yaml",
+    "sim-bezakat-source/pnpm-workspace.yaml"
+  ],
+  "restartOn": ["sim-bezakat-source/next.config.ts"]
+}
