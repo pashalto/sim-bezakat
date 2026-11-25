@@ -12,6 +12,10 @@ try{
     deployment_assert(str_contains(database_config()['dsn'],'sslmode=disable'),'existing local PostgreSQL config supported');
     putenv('BEZAKAT_DB_HOST=ep-example-pooler.ap-southeast-1.aws.neon.tech');putenv('BEZAKAT_DB_SSLMODE=verify-full');
     deployment_assert(str_contains(database_config()['dsn'],'sslmode=verify-full'),'Neon pooled hostname with certificate verification');
+    deployment_assert(in_array('options=endpoint=ep-example-pooler', explode(';', database_config()['dsn']), true), 'explicit pooled endpoint for libpq without SNI');
+    putenv('BEZAKAT_DB_HOST=127.0.0.1');
+    deployment_assert(!str_contains(database_config()['dsn'], ';options='), 'local PostgreSQL receives no Neon routing option');
+    putenv('BEZAKAT_DB_HOST=ep-example-pooler.ap-southeast-1.aws.neon.tech');
     putenv('BEZAKAT_DB_NAME=neondb');deployment_assert(database_config()['database']==='neondb','database name is configurable');
     putenv('BEZAKAT_DB_NAME=sim_bezakat_dev;sslmode=disable');deployment_assert(config_rejected(),'DSN injection rejected');putenv('BEZAKAT_DB_NAME=sim_bezakat_dev');
     putenv('BEZAKAT_DB_SSLMODE=disable');deployment_assert(config_rejected(),'remote TLS downgrade rejected');putenv('BEZAKAT_DB_SSLMODE=verify-full');

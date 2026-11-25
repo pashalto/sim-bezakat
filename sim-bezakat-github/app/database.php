@@ -12,9 +12,16 @@ function database_config(): array {
     $ca=env('BEZAKAT_DB_SSLROOTCERT');
     if($ssl==='verify-full'&&$ca==='')foreach(['/etc/pki/tls/certs/ca-bundle.crt','/etc/ssl/certs/ca-certificates.crt','/etc/ssl/cert.pem'] as $candidate)if(is_readable($candidate)){$ca=$candidate;break;}
     if($ca!==''&&(!is_readable($ca)||strpbrk($ca,";\r\n")!==false))throw new PortalError(503,'Berkas CA PostgreSQL tidak tersedia atau tidak valid.');
-    return ['dsn'=>"pgsql:host=$host;port=$port;dbname=$name;sslmode=$ssl;connect_timeout=10;application_name=sim-bezakat-php".($ca!==''?';sslrootcert='.$ca:''),'user'=>$user,'password'=>env('BEZAKAT_DB_PASSWORD'),'database'=>$name];
+    // libpq before 14 does not send SNI. Neon also accepts the endpoint in
+    // the startup packet. Keep the pooler suffix and verify the original host.
+    $routing = '';
+    if (!$local && preg_match('/^(ep-[a-z0-9-]+)\./i', $host, $match)) {
+        $routing = ';options=endpoint=' . strtolower($match[1]);
+    }
+    return ['dsn'=>"pgsql:host=$host;port=$port;dbname=$name;sslmode=$ssl;connect_timeout=10;application_name=sim-bezakat-php".$routing.($ca!==''?';sslrootcert='.$ca:''),'user'=>$user,'password'=>env('BEZAKAT_DB_PASSWORD'),'database'=>$name];
 }
-function database_connect(): PDO {
+function database_connect(?string &$stage = null): PDO {
+    $stage = 'db.config';
     $config=database_config();
     $options=[
         PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION, PDO::ATTR_EMULATE_PREPARES=>false, PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,
@@ -23,8 +30,11 @@ function database_connect(): PDO {
     // Keep native bound parameters without named prepared-statement session state.
     $disablePrepares=class_exists('Pdo\\Pgsql')?\Pdo\Pgsql::ATTR_DISABLE_PREPARES:constant('PDO::PGSQL_ATTR_DISABLE_PREPARES');
     $options[$disablePrepares]=true;
+    $stage = 'db.connect';
     $connection=new PDO($config['dsn'],$config['user'],$config['password'],$options);
+    $stage = 'db.role_query';
     $row=$connection->query("SELECT current_database() AS db, current_user AS usr, r.rolsuper, r.rolcreatedb, r.rolcreaterole, r.rolbypassrls, r.rolreplication, d.datdba=r.oid AS owns_db, EXISTS(SELECT 1 FROM pg_auth_members m WHERE m.member=r.oid) AS has_memberships FROM pg_roles r JOIN pg_database d ON d.datname=current_database() WHERE r.rolname=current_user")->fetch();
+    $stage = 'db.role_check';
     foreach (['rolsuper','rolcreatedb','rolcreaterole','rolbypassrls','rolreplication','owns_db','has_memberships'] as $flag) {
         if (db_bool($row[$flag]??false)) throw new PortalError(503,'Gunakan akun aplikasi terbatas sim_bezakat_app seperti pada proyek asal.');
     }

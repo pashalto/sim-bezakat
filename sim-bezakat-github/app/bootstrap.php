@@ -25,13 +25,27 @@ ini_set('session.gc_maxlifetime', '28800');
 session_name('sim_bezakat_php');
 session_set_cookie_params(['lifetime'=>0, 'path'=>'/', 'secure'=>request_https(), 'httponly'=>true, 'samesite'=>'Strict']);
 if (PHP_SAPI !== 'cli' || !defined('NO_SESSION')) {
+    $handler = null;
+    $stage = 'session.driver';
     try{
         if(session_driver()==='postgres'){
-            session_set_save_handler(new PostgresSessionHandler(),true);
+            $stage = 'session.register';
+            $handler = new PostgresSessionHandler();
+            if (!session_set_save_handler($handler, true)) throw new RuntimeException();
             ini_set('session.gc_probability','1');ini_set('session.gc_divisor','100');
         }else session_save_path(ROOT.'/storage');
-        if(!session_start())throw new RuntimeException('Session unavailable');
+        $stage = 'session.start';
+        if(!@session_start())throw new RuntimeException('Session unavailable');
     }catch(Throwable $error){
+        if ($handler !== null && $stage === 'session.start') $stage = $handler->stage;
+        $state = null;
+        if ($error instanceof PDOException) {
+            $code = (string)($error->errorInfo[0] ?? $error->getCode());
+            if (preg_match('/^[A-Z0-9]{5}$/D', $code)) $state = $code;
+            elseif (preg_match('/^SQLSTATE\[([A-Z0-9]{5})\]/', $error->getMessage(), $matches)) $state = $matches[1];
+        }
+        // SAPI logging also works when the serverless filesystem is read-only.
+        error_log('bezakat.session stage='.$stage.' sqlstate='.($state ?? 'none'), 4);
         // No filesystem fallback on serverless and no connection details in the response.
         http_response_code(503);header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: no-store');echo '{"error":"Penyimpanan sesi belum siap. Periksa konfigurasi database dan SQL serverless."}';exit;

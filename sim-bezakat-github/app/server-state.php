@@ -14,13 +14,16 @@ function request_https(): bool {
 /** One dedicated connection/transaction per session read->write. Row locks work
  * with transaction pooling; no session-level advisory locks or local files. */
 final class PostgresSessionHandler implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface {
+    public string $stage = 'session.start';
     private ?PDO $db=null;
-    private function db(): PDO {return $this->db??=database_connect();}
+    private function db(): PDO {return $this->db??=database_connect($this->stage);}
     private function key(string $id): string {return hash('sha256',$id);}
     private function call(string $function,array $params): mixed {
         $names=['session_valid','session_read','session_write','session_delete','session_gc'];
         if(!in_array($function,$names,true))throw new LogicException('Invalid session function');
-        $statement=$this->db()->prepare('SELECT sim_bezakat_runtime.'.$function.'('.implode(',',array_fill(0,count($params),'?')).') AS value');
+        $db = $this->db();
+        $this->stage = $function;
+        $statement=$db->prepare('SELECT sim_bezakat_runtime.'.$function.'('.implode(',',array_fill(0,count($params),'?')).') AS value');
         $statement->execute($params);return $statement->fetchColumn();
     }
     public function open(string $path,string $name): bool {return true;}
@@ -29,7 +32,9 @@ final class PostgresSessionHandler implements SessionHandlerInterface, SessionUp
     }
     public function validateId(string $id): bool {return db_bool($this->call('session_valid',[$this->key($id)]));}
     public function read(string $id): string|false {
-        if(!$this->db()->inTransaction())$this->db()->beginTransaction();
+        $db = $this->db();
+        $this->stage = 'session.begin';
+        if (!$db->inTransaction()) $db->beginTransaction();
         $encoded=$this->call('session_read',[$this->key($id)]);
         $data=base64_decode((string)$encoded,true);return $data===false?'':$data;
     }
