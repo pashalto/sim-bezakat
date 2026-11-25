@@ -1,0 +1,9 @@
+/* Minimal PHP/browser interaction rules; original Tailwind styling is portal.css. */
+[hidden] { display:none !important; }
+body { font-family: 'Plus Jakarta Sans', Arial, Helvetica, sans-serif; }
+dialog:not([open]) { display:none; }
+button:disabled { cursor:not-allowed; }
+select { max-width:100%; }
+#toast { white-space:pre-line; }
+@media(max-width:1023px) { aside[data-mobile-open] { translate:0 0; transform:translateX(0); } }
+@media print { body>div>div>aside,header,button,#toast,[data-review-controls] {display:none!important} .lg\:pl-\[252px\]{padding-left:0!important} details>div{display:block!important} main{max-width:none!important;padding:0!important} }

@@ -1,0 +1,2104 @@
+{
+  "accounts": [
+    {
+      "id": "awardee-aulia",
+      "username": "BZI-251-0000001",
+      "name": "Aulia Contoh",
+      "role": "awardee",
+      "roleLabel": "Awardee",
+      "institution": "LAZ Amanah Nusantara"
+    },
+    {
+      "id": "awardee-fikri",
+      "username": "BZI-251-0000002",
+      "name": "Fikri Contoh",
+      "role": "awardee",
+      "roleLabel": "Awardee",
+      "institution": "LAZ Amanah Nusantara"
+    },
+    {
+      "id": "awardee-salma",
+      "username": "BZI-251-0000003",
+      "name": "Salma Contoh",
+      "role": "awardee",
+      "roleLabel": "Awardee",
+      "institution": "LAZ Cahaya Umat"
+    },
+    {
+      "id": "coordinator-nadia",
+      "username": "BZI-001-0000001",
+      "name": "Nadia Contoh",
+      "role": "coordinator",
+      "roleLabel": "Koordinator Awardee",
+      "scope": [
+        "awardee-aulia",
+        "awardee-fikri"
+      ]
+    },
+    {
+      "id": "institution-rahman",
+      "username": "BZI-251-0000005",
+      "name": "Rahman Contoh",
+      "role": "institution",
+      "roleLabel": "Pengelola Lembaga Zakat",
+      "scope": [
+        "awardee-aulia",
+        "awardee-fikri"
+      ],
+      "institution": "LAZ Amanah Nusantara"
+    },
+    {
+      "id": "ministry-siti",
+      "username": "BZI-251-0000006",
+      "name": "Siti Contoh",
+      "role": "ministry",
+      "roleLabel": "Pengelola Kemenag",
+      "scope": [
+        "awardee-aulia",
+        "awardee-fikri",
+        "awardee-salma"
+      ]
+    }
+  ],
+  "state": {
+    "profiles": {
+      "awardee-aulia": {
+        "ownerId": "awardee-aulia",
+        "photoName": "",
+        "photoUrl": "",
+        "fullName": "Aulia Contoh",
+        "birthPlace": "Kota Contoh",
+        "birthDate": "2005-01-01",
+        "gender": "Perempuan",
+        "identityAddress": "Alamat Contoh, Kota Contoh",
+        "domicileType": "Asrama",
+        "domicileAddress": "Asrama Contoh, Kota Contoh",
+        "guardianName": "Wali Contoh",
+        "guardianContact": "000000000000",
+        "socialMedia": "contoh.example.invalid",
+        "university": "Universitas Contoh Nusantara",
+        "studyProgram": "Ilmu Komputer",
+        "studentNumber": "DEMO-NIM-001",
+        "sponsor": "LAZ Amanah Nusantara",
+        "registrationNumber": "BZI-251-0000001",
+        "gpaValue": "3,67",
+        "gpaType": "IPK",
+        "gpaSemester": "Semester 1",
+        "gpaHistory": [
+          3.67,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "awardee-fikri": {
+        "ownerId": "awardee-fikri",
+        "photoName": "",
+        "photoUrl": "",
+        "fullName": "Fikri Contoh",
+        "birthPlace": "Bandung",
+        "birthDate": "2005-08-17",
+        "gender": "Laki-laki",
+        "identityAddress": "Alamat Contoh, Kota Contoh",
+        "domicileType": "Asrama",
+        "domicileAddress": "Asrama Contoh, Kota Contoh",
+        "guardianName": "Wali Contoh",
+        "guardianContact": "000000000000",
+        "socialMedia": "contoh.example.invalid",
+        "university": "Universitas Negeri Sejahtera",
+        "studyProgram": "Ekonomi Syariah",
+        "studentNumber": "EK240087",
+        "sponsor": "LAZ Amanah Nusantara",
+        "registrationNumber": "BZI-251-0000002",
+        "gpaValue": "3,88",
+        "gpaType": "IPK",
+        "gpaSemester": "Semester 8",
+        "gpaHistory": [
+          3.42,
+          3.55,
+          3.63,
+          3.7,
+          3.68,
+          3.76,
+          3.81,
+          3.88
+        ]
+      },
+      "awardee-salma": {
+        "ownerId": "awardee-salma",
+        "photoName": "",
+        "photoUrl": "",
+        "fullName": "Salma Contoh",
+        "birthPlace": "Bandung",
+        "birthDate": "2005-08-17",
+        "gender": "Perempuan",
+        "identityAddress": "Alamat Contoh, Kota Contoh",
+        "domicileType": "Asrama",
+        "domicileAddress": "Asrama Contoh, Kota Contoh",
+        "guardianName": "Wali Contoh",
+        "guardianContact": "000000000000",
+        "socialMedia": "contoh.example.invalid",
+        "university": "Institut Pendidikan Madani",
+        "studyProgram": "Pendidikan Matematika",
+        "studentNumber": "KM240061",
+        "sponsor": "LAZ Cahaya Umat",
+        "registrationNumber": "BZI-251-0000003",
+        "gpaValue": "3,88",
+        "gpaType": "IPK",
+        "gpaSemester": "Semester 8",
+        "gpaHistory": [
+          3.42,
+          3.55,
+          3.63,
+          3.7,
+          3.68,
+          3.76,
+          3.81,
+          3.88
+        ]
+      }
+    },
+    "periods": [
+      {
+        "id": "awardee-aulia-2026-01",
+        "reportId": "awardee-aulia-2026-01",
+        "ownerId": "awardee-aulia",
+        "month": 1,
+        "year": 2026,
+        "reportStatus": "approved",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-aulia-1-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "approved",
+            "issues": []
+          },
+          "akademik": {
+            "status": "approved",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "approved",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "approved",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "sosial": {
+            "status": "approved",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "approved",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-01-current",
+            "category": "current",
+            "name": "Keuangan-2026-01.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "approved"
+          },
+          {
+            "id": "2026-01-next",
+            "category": "next",
+            "name": "Rencana-2026-01-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-02-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "profileSnapshot": {
+          "ownerId": "awardee-aulia",
+          "photoName": "",
+          "photoUrl": "",
+          "fullName": "Aulia Contoh",
+          "birthPlace": "Kota Contoh",
+          "birthDate": "2005-01-01",
+          "gender": "Perempuan",
+          "identityAddress": "Alamat Contoh, Kota Contoh",
+          "domicileType": "Asrama",
+          "domicileAddress": "Asrama Contoh, Kota Contoh",
+          "guardianName": "Wali Contoh",
+          "guardianContact": "000000000000",
+          "socialMedia": "contoh.example.invalid",
+          "university": "Universitas Contoh Nusantara",
+          "studyProgram": "Ilmu Komputer",
+          "studentNumber": "DEMO-NIM-001",
+          "sponsor": "LAZ Amanah Nusantara",
+          "registrationNumber": "BZI-251-0000001",
+          "gpaValue": "3,67",
+          "gpaType": "IPK",
+          "gpaSemester": "Semester 1",
+          "gpaHistory": [
+            3.67,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "reviewHistory": [
+          {
+            "date": "2026-02-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Seluruh bagian laporan disetujui."
+          }
+        ]
+      },
+      {
+        "id": "awardee-aulia-2026-02",
+        "reportId": "awardee-aulia-2026-02",
+        "ownerId": "awardee-aulia",
+        "month": 2,
+        "year": 2026,
+        "reportStatus": "approved",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-aulia-2-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "approved",
+            "issues": []
+          },
+          "akademik": {
+            "status": "approved",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "approved",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "approved",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "sosial": {
+            "status": "approved",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "approved",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-02-current",
+            "category": "current",
+            "name": "Keuangan-2026-02.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "approved"
+          },
+          {
+            "id": "2026-02-next",
+            "category": "next",
+            "name": "Rencana-2026-02-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-03-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "profileSnapshot": {
+          "ownerId": "awardee-aulia",
+          "photoName": "",
+          "photoUrl": "",
+          "fullName": "Aulia Contoh",
+          "birthPlace": "Kota Contoh",
+          "birthDate": "2005-01-01",
+          "gender": "Perempuan",
+          "identityAddress": "Alamat Contoh, Kota Contoh",
+          "domicileType": "Asrama",
+          "domicileAddress": "Asrama Contoh, Kota Contoh",
+          "guardianName": "Wali Contoh",
+          "guardianContact": "000000000000",
+          "socialMedia": "contoh.example.invalid",
+          "university": "Universitas Contoh Nusantara",
+          "studyProgram": "Ilmu Komputer",
+          "studentNumber": "DEMO-NIM-001",
+          "sponsor": "LAZ Amanah Nusantara",
+          "registrationNumber": "BZI-251-0000001",
+          "gpaValue": "3,67",
+          "gpaType": "IPK",
+          "gpaSemester": "Semester 1",
+          "gpaHistory": [
+            3.67,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "reviewHistory": [
+          {
+            "date": "2026-03-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Seluruh bagian laporan disetujui."
+          }
+        ]
+      },
+      {
+        "id": "awardee-aulia-2026-03",
+        "reportId": "awardee-aulia-2026-03",
+        "ownerId": "awardee-aulia",
+        "month": 3,
+        "year": 2026,
+        "reportStatus": "revision",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-aulia-3-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "approved",
+            "issues": []
+          },
+          "akademik": {
+            "status": "revision",
+            "issues": [
+              {
+                "questionId": "material",
+                "reason": "Data tidak konsisten"
+              }
+            ]
+          },
+          "pengembangan": {
+            "status": "approved",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "approved",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "sosial": {
+            "status": "approved",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "approved",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-03-current",
+            "category": "current",
+            "name": "Keuangan-2026-03.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "approved"
+          },
+          {
+            "id": "2026-03-next",
+            "category": "next",
+            "name": "Rencana-2026-03-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-04-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "profileSnapshot": {
+          "ownerId": "awardee-aulia",
+          "photoName": "",
+          "photoUrl": "",
+          "fullName": "Aulia Contoh",
+          "birthPlace": "Kota Contoh",
+          "birthDate": "2005-01-01",
+          "gender": "Perempuan",
+          "identityAddress": "Alamat Contoh, Kota Contoh",
+          "domicileType": "Asrama",
+          "domicileAddress": "Asrama Contoh, Kota Contoh",
+          "guardianName": "Wali Contoh",
+          "guardianContact": "000000000000",
+          "socialMedia": "contoh.example.invalid",
+          "university": "Universitas Contoh Nusantara",
+          "studyProgram": "Ilmu Komputer",
+          "studentNumber": "DEMO-NIM-001",
+          "sponsor": "LAZ Amanah Nusantara",
+          "registrationNumber": "BZI-251-0000001",
+          "gpaValue": "3,67",
+          "gpaType": "IPK",
+          "gpaSemester": "Semester 1",
+          "gpaHistory": [
+            3.67,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "reviewHistory": [
+          {
+            "date": "2026-04-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Laporan diperiksa."
+          },
+          {
+            "date": "2026-04-09T13:20:00.000Z",
+            "actor": "Nadia Contoh",
+            "text": "Bagian Akademik perlu perbaikan pada 1 isian."
+          }
+        ]
+      },
+      {
+        "id": "awardee-aulia-2026-04",
+        "reportId": "awardee-aulia-2026-04",
+        "ownerId": "awardee-aulia",
+        "month": 4,
+        "year": 2026,
+        "reportStatus": "approved",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-aulia-4-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "approved",
+            "issues": []
+          },
+          "akademik": {
+            "status": "approved",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "approved",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "approved",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "sosial": {
+            "status": "approved",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "approved",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-04-current",
+            "category": "current",
+            "name": "Keuangan-2026-04.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "revision",
+            "reason": "Berkas tidak terbaca"
+          },
+          {
+            "id": "2026-04-next",
+            "category": "next",
+            "name": "Rencana-2026-04-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-05-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "profileSnapshot": {
+          "ownerId": "awardee-aulia",
+          "photoName": "",
+          "photoUrl": "",
+          "fullName": "Aulia Contoh",
+          "birthPlace": "Kota Contoh",
+          "birthDate": "2005-01-01",
+          "gender": "Perempuan",
+          "identityAddress": "Alamat Contoh, Kota Contoh",
+          "domicileType": "Asrama",
+          "domicileAddress": "Asrama Contoh, Kota Contoh",
+          "guardianName": "Wali Contoh",
+          "guardianContact": "000000000000",
+          "socialMedia": "contoh.example.invalid",
+          "university": "Universitas Contoh Nusantara",
+          "studyProgram": "Ilmu Komputer",
+          "studentNumber": "DEMO-NIM-001",
+          "sponsor": "LAZ Amanah Nusantara",
+          "registrationNumber": "BZI-251-0000001",
+          "gpaValue": "3,67",
+          "gpaType": "IPK",
+          "gpaSemester": "Semester 1",
+          "gpaHistory": [
+            3.67,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "reviewHistory": [
+          {
+            "date": "2026-05-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Seluruh bagian laporan disetujui."
+          },
+          {
+            "date": "2026-05-09T11:00:00.000Z",
+            "actor": "Nadia Contoh",
+            "text": "Dokumen keuangan periode berjalan perlu diganti."
+          }
+        ]
+      },
+      {
+        "id": "awardee-aulia-2026-05",
+        "reportId": "awardee-aulia-2026-05",
+        "ownerId": "awardee-aulia",
+        "month": 5,
+        "year": 2026,
+        "reportStatus": "draft",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "monthly_domicile": "Asrama"
+        },
+        "activities": [],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "draft",
+            "issues": []
+          },
+          "akademik": {
+            "status": "draft",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "draft",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "draft",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "draft",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "draft",
+            "issues": []
+          },
+          "sosial": {
+            "status": "draft",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "draft",
+            "issues": []
+          }
+        },
+        "financeDocuments": [],
+        "allowanceReceived": false,
+        "reviewHistory": []
+      },
+      {
+        "id": "awardee-fikri-2026-01",
+        "reportId": "awardee-fikri-2026-01",
+        "ownerId": "awardee-fikri",
+        "month": 1,
+        "year": 2026,
+        "reportStatus": "approved",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-fikri-1-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "approved",
+            "issues": []
+          },
+          "akademik": {
+            "status": "approved",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "approved",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "approved",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "sosial": {
+            "status": "approved",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "approved",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-01-current",
+            "category": "current",
+            "name": "Keuangan-2026-01.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "approved"
+          },
+          {
+            "id": "2026-01-next",
+            "category": "next",
+            "name": "Rencana-2026-01-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-02-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "reviewHistory": [
+          {
+            "date": "2026-02-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Seluruh bagian laporan disetujui."
+          }
+        ]
+      },
+      {
+        "id": "awardee-fikri-2026-02",
+        "reportId": "awardee-fikri-2026-02",
+        "ownerId": "awardee-fikri",
+        "month": 2,
+        "year": 2026,
+        "reportStatus": "approved",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-fikri-2-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "approved",
+            "issues": []
+          },
+          "akademik": {
+            "status": "approved",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "approved",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "approved",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "sosial": {
+            "status": "approved",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "approved",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-02-current",
+            "category": "current",
+            "name": "Keuangan-2026-02.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "approved"
+          },
+          {
+            "id": "2026-02-next",
+            "category": "next",
+            "name": "Rencana-2026-02-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-03-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "reviewHistory": [
+          {
+            "date": "2026-03-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Seluruh bagian laporan disetujui."
+          }
+        ]
+      },
+      {
+        "id": "awardee-fikri-2026-03",
+        "reportId": "awardee-fikri-2026-03",
+        "ownerId": "awardee-fikri",
+        "month": 3,
+        "year": 2026,
+        "reportStatus": "submitted",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-fikri-3-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "submitted",
+            "issues": []
+          },
+          "akademik": {
+            "status": "submitted",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "submitted",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "submitted",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "submitted",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "submitted",
+            "issues": []
+          },
+          "sosial": {
+            "status": "submitted",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "submitted",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-03-current",
+            "category": "current",
+            "name": "Keuangan-2026-03.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "approved"
+          },
+          {
+            "id": "2026-03-next",
+            "category": "next",
+            "name": "Rencana-2026-03-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-04-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "reviewHistory": [
+          {
+            "date": "2026-04-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Laporan diperiksa."
+          }
+        ]
+      },
+      {
+        "id": "awardee-fikri-2026-04",
+        "reportId": "awardee-fikri-2026-04",
+        "ownerId": "awardee-fikri",
+        "month": 4,
+        "year": 2026,
+        "reportStatus": "draft",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "monthly_domicile": "Asrama"
+        },
+        "activities": [],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "draft",
+            "issues": []
+          },
+          "akademik": {
+            "status": "draft",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "draft",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "draft",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "draft",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "draft",
+            "issues": []
+          },
+          "sosial": {
+            "status": "draft",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "draft",
+            "issues": []
+          }
+        },
+        "financeDocuments": [],
+        "allowanceReceived": true,
+        "reviewHistory": []
+      },
+      {
+        "id": "awardee-salma-2026-01",
+        "reportId": "awardee-salma-2026-01",
+        "ownerId": "awardee-salma",
+        "month": 1,
+        "year": 2026,
+        "reportStatus": "approved",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-salma-1-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "approved",
+            "issues": []
+          },
+          "akademik": {
+            "status": "approved",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "approved",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "approved",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "approved",
+            "issues": []
+          },
+          "sosial": {
+            "status": "approved",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "approved",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-01-current",
+            "category": "current",
+            "name": "Keuangan-2026-01.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "approved"
+          },
+          {
+            "id": "2026-01-next",
+            "category": "next",
+            "name": "Rencana-2026-01-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-02-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "reviewHistory": [
+          {
+            "date": "2026-02-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Seluruh bagian laporan disetujui."
+          }
+        ]
+      },
+      {
+        "id": "awardee-salma-2026-02",
+        "reportId": "awardee-salma-2026-02",
+        "ownerId": "awardee-salma",
+        "month": 2,
+        "year": 2026,
+        "reportStatus": "revision",
+        "answers": {
+          "parent_rating": "5 · Sangat baik",
+          "parent_communication": [
+            "Komunikasi setiap hari",
+            "Hubungan harmonis dan saling mendukung"
+          ],
+          "lecturer_rating": "4 · Baik",
+          "peer_rating": "5 · Sangat baik",
+          "mentor_rating": "4 · Baik",
+          "bullying_experience": "Tidak pernah",
+          "monthly_domicile": "Asrama",
+          "schedule": "4 · Baik",
+          "material": "4 · Baik",
+          "motivation": "5 · Sangat baik",
+          "confidence": "4 · Baik",
+          "balance": "4 · Baik",
+          "stress": "4 · Baik",
+          "emotion": "4 · Baik",
+          "hobby_time": "3 · Cukup",
+          "current_challenges": [
+            "Manajemen waktu"
+          ],
+          "challenge_story": "Saya menyusun prioritas mingguan dan berdiskusi dengan teman belajar.",
+          "talent_mapping_score": "4 · Diterapkan konsisten",
+          "talent_mapping": [
+            "Optimalisasi cara belajar",
+            "Manajemen diri dan produktivitas"
+          ],
+          "next_month_targets": [
+            "Pencapaian akademik",
+            "Peningkatan keterampilan"
+          ],
+          "next_month_strategy": "Menyusun jadwal belajar dan mengikuti satu kelas pengembangan keterampilan.",
+          "long_term_targets": [
+            "Akademik",
+            "Karier dan profesional",
+            "Finansial"
+          ],
+          "academic_strategy": "Menjaga IPK dan aktif dalam proyek riset.",
+          "career_strategy": "Membangun portofolio dan mencari pengalaman magang.",
+          "financial_strategy": "Membangun kebiasaan menabung untuk dana darurat.",
+          "self_growth_strategy": "Berlatih public speaking secara rutin.",
+          "social_strategy": "Terlibat dalam kegiatan pendidikan masyarakat.",
+          "life_strategy": "Menjaga pola tidur dan olahraga teratur.",
+          "organization_status": "Mengikuti",
+          "organization_types": [
+            "Himpunan mahasiswa/prodi"
+          ],
+          "committee_scope": [
+            "Tingkat program studi"
+          ],
+          "committee_field": [
+            "Akademik"
+          ],
+          "organization_role": [
+            "Anggota"
+          ],
+          "organization_story": "Aktif membantu pelaksanaan kelas pengembangan akademik.",
+          "prayer_early": "91–120 kali",
+          "night_prayer": "1–10 kali",
+          "dhuha_prayer": "11–15 kali",
+          "quran_reading": "6–10 juz",
+          "memorization": "11–20 surat",
+          "charity": "Rp31.000–Rp60.000",
+          "speaker_count": "Tidak Ada",
+          "speaker_topic": [
+            "Tidak Ada"
+          ],
+          "study_count": "2 kali",
+          "study_topics": [
+            "Akhlak dan tasawuf"
+          ],
+          "religious_contribution": [
+            "Peserta kajian"
+          ],
+          "book_category": [
+            "Nonreligius"
+          ],
+          "book_story": "Atomic Habits, tentang membangun kebiasaan kecil secara konsisten.",
+          "religious_activity": [
+            "Peserta kajian"
+          ],
+          "academic_achievement": [
+            "Tidak Ada"
+          ],
+          "innovation_achievement": [
+            "Tidak Ada"
+          ],
+          "delegation": [
+            "Tidak Ada"
+          ],
+          "nonacademic_achievement": [
+            "Tidak Ada"
+          ],
+          "competencies": [
+            "Microsoft Office"
+          ],
+          "competency_story": "Menyelesaikan pelatihan spreadsheet tingkat menengah.",
+          "community_activities": [
+            "Pendidikan dan pengembangan diri"
+          ],
+          "community_story": "Mendampingi belajar anak-anak di lingkungan asrama.",
+          "social_project_status": "Belum Ada",
+          "social_project": [
+            "Belum Ada"
+          ],
+          "executive_summary": "Bulan ini saya lebih teratur mengelola kegiatan akademik dan mulai meningkatkan kontribusi sosial."
+        },
+        "activities": [
+          {
+            "id": "awardee-salma-2-activity",
+            "name": "Himpunan Mahasiswa Teknologi",
+            "type": "Organisasi",
+            "role": "Anggota",
+            "description": "Mendukung kelas pengembangan akademik untuk mahasiswa baru.",
+            "evidence": "https://drive.example/kegiatan-demo"
+          }
+        ],
+        "sectionReviews": {
+          "keluarga": {
+            "status": "revision",
+            "issues": []
+          },
+          "akademik": {
+            "status": "revision",
+            "issues": []
+          },
+          "pengembangan": {
+            "status": "revision",
+            "issues": []
+          },
+          "organisasi": {
+            "status": "revision",
+            "issues": []
+          },
+          "ruhiyah": {
+            "status": "revision",
+            "issues": []
+          },
+          "prestasi": {
+            "status": "revision",
+            "issues": []
+          },
+          "sosial": {
+            "status": "revision",
+            "issues": []
+          },
+          "ringkasan": {
+            "status": "revision",
+            "issues": []
+          }
+        },
+        "financeDocuments": [
+          {
+            "id": "2026-02-current",
+            "category": "current",
+            "name": "Keuangan-2026-02.xlsx",
+            "size": 286720,
+            "uploadedAt": "2026-02-07T09:30:00.000Z",
+            "status": "approved"
+          },
+          {
+            "id": "2026-02-next",
+            "category": "next",
+            "name": "Rencana-2026-02-berikutnya.xlsx",
+            "size": 174080,
+            "uploadedAt": "2026-02-07T09:35:00.000Z",
+            "status": "approved"
+          }
+        ],
+        "submittedAt": "2026-03-07T09:42:00.000Z",
+        "allowanceReceived": true,
+        "reviewHistory": [
+          {
+            "date": "2026-03-08T10:00:00.000Z",
+            "actor": "Koordinator",
+            "text": "Laporan diperiksa."
+          }
+        ]
+      }
+    ],
+    "transcripts": []
+  },
+  "activePeriod": {
+    "month": 5,
+    "year": 2026
+  }
+}

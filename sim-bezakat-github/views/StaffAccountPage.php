@@ -1,0 +1,6 @@
+<?php
+// Imported original markup; native PHP rendering. Edit this view freely.
+$account = $props['account'] ?? null;
+
+extract(view_context('StaffAccountPage', get_defined_vars()), EXTR_OVERWRITE);
+return fragment([view('PageHeading', ['eyebrow' => 'Akun','title' => 'Profil Saya','description' => 'Informasi akun yang sedang digunakan.','children' => fragment([])]),tag('div', ['class' => 'max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm'], [tag('div', ['class' => 'flex items-center gap-4'], [view('Avatar', ['name' => jget($account, 'name'),'children' => fragment([])]),tag('div', [], [tag('h2', ['class' => 'text-lg font-extrabold'], [jget($account, 'name')]),tag('p', ['class' => 'mt-1 text-xs text-emerald-700'], [jget($account, 'roleLabel')])])]),tag('dl', ['class' => 'mt-6 grid gap-4 sm:grid-cols-2'], [view('Info', ['label' => 'ID beasiswa','value' => jget($account, 'username'),'children' => fragment([])]),view('Info', ['label' => 'Peran','value' => jget($account, 'roleLabel'),'children' => fragment([])]),view('Info', ['label' => 'Lembaga','value' => (jget($account, 'institution') ?? (jtruth((jget($account, 'role') === 'ministry')) ? 'Kementerian Agama' : '—')),'children' => fragment([])]),view('Info', ['label' => 'Jumlah awardee dalam cakupan','value' => jstr((jlen(jget($account, 'scope')) ?? 0)),'children' => fragment([])])])])]);
