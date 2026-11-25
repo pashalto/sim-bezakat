@@ -2,6 +2,8 @@
 
 Portal monitoring penerima Beasiswa Zakat Indonesia untuk awardee, koordinator, pengelola LAZ, dan Kemenag. Aplikasi ini memakai **PHP native, PostgreSQL, HTML/CSS, dan JavaScript biasa**. Tidak memakai server Next.js/React/TypeScript.
 
+**Deploy ke proyek Vercel yang sudah ada dan Neon:** ikuti [panduan Vercel–Neon](docs/VERCEL-NEON.md). Konfigurasi `vercel.json` memakai runtime PHP komunitas; kode aplikasi tetap PHP. Panduan mencakup Root Directory, environment variables, role terbatas, migrasi 001–007, dan SQL tambahan penyimpanan sesi bersama.
+
 ## Fitur
 
 - Login menggunakan `id_beasiswa`, logout, PHP session, serta pembatasan akses sesuai peran dan cakupan akun.
@@ -48,6 +50,8 @@ BEZAKAT_DB_PORT=5432
 BEZAKAT_DB_NAME=sim_bezakat_dev
 BEZAKAT_DB_USER=sim_bezakat_app
 BEZAKAT_DB_PASSWORD=""
+BEZAKAT_DB_SSLMODE=disable
+BEZAKAT_SESSION_DRIVER=files
 BEZAKAT_ENABLE_PREVIEW=0
 ```
 
@@ -57,7 +61,7 @@ Isi password akun aplikasi pada file privat tersebut. Nilai environment proses m
 
 Gunakan database dan kredensial aplikasi yang sudah disiapkan; **jangan jalankan alat pembuatan database atau seed ulang**. Kontrak aplikasi mengikuti skema `sim_bezakat` dari SQL versi 1–7 dalam repository ini. PK/FK tetap numerik; `id_beasiswa` adalah ID bisnis untuk login, bukan pengganti primary key.
 
-Konfigurasi runtime mempertahankan batas proyek: koneksi lokal ke `sim_bezakat_dev` sebagai `sim_bezakat_app`. Role aplikasi harus non-owner, bukan superuser, tanpa hak membuat database/role, bypass RLS, atau keanggotaan role lain. Seluruh kueri runtime memakai PDO PostgreSQL; input menggunakan prepared statements asli.
+Konfigurasi runtime menerima localhost atau hostname Neon (`*.neon.tech`) sebagai `sim_bezakat_app`. Koneksi Neon wajib `sslmode=verify-full`; nama database dapat dikonfigurasi. Untuk memakai migrasi 001–007 tanpa perubahan, database harus bernama `sim_bezakat_dev`. Role aplikasi harus non-owner, bukan superuser, tanpa hak membuat database/role, bypass RLS, atau keanggotaan role lain. Seluruh kueri memakai PDO PostgreSQL dengan parameter native, tanpa koneksi persisten atau state prepared-statement bernama antar-transaksi.
 
 Periksa kesiapan koneksi secara baca-saja:
 
@@ -100,7 +104,7 @@ Buka [http://127.0.0.1:8088](http://127.0.0.1:8088). Biarkan terminal tetap terb
 
 Untuk Apache, arahkan **DocumentRoot ke `public/`**, aktifkan `mod_rewrite`, dan izinkan `.htaccess`. URL aplikasi mengacu root host. Jangan menjadikan seluruh repository sebagai document root.
 
-PHP harus dapat menulis direktori `storage/` untuk session dan log. Repository hanya menyertakan `.gitkeep`; berkas runtime akan dibuat lokal dan diabaikan Git. Kredensial dan storage tidak boleh disajikan oleh web server.
+Pada mode lokal `BEZAKAT_SESSION_DRIVER=files`, PHP perlu menulis `storage/` untuk session, pembatas login, dan log. Di Vercel wajib memakai `postgres`: sesi dan pembatas login disimpan melalui schema terpisah `sim_bezakat_runtime`, sedangkan log menuju stderr platform. Tidak mengandalkan `/tmp` atau filesystem instance untuk login. Kredensial dan storage tidak boleh disajikan oleh web server.
 
 ### Akun fiktif setelah seed baru
 
@@ -123,6 +127,8 @@ public/               document root, endpoint PHP, gambar, CSS, font, JavaScript
 database/migrations/  SQL struktur PostgreSQL berurutan 001–007
 database/seeds/       data contoh fiktif, tanpa kredensial asli
 tools/                diagnosis koneksi dan penyiapan database baru
+api/index.php         entrypoint PHP dinamis khusus Vercel
+database/deploy/      setup role Neon dan SQL state serverless terpisah
 tests/                uji validasi/render dan fixture fiktif
 storage/              direktori runtime privat; hanya .gitkeep disertakan
 docs/                 catatan pemeriksaan kesiapan repository
@@ -137,10 +143,11 @@ Navigasi memakai `?page=...`. API PHP berada di `/api.php?action=login|logout|se
 ```powershell
 php tests/validation.php
 php tests/render.php
+php tests/deployment.php
 php tools/db-check.php
 ```
 
-Dua uji pertama tidak membutuhkan koneksi database. Uji koneksi membutuhkan konfigurasi lokal, hanya membaca metadata/view, dan tidak mengubah skema/data. Fixture dalam `tests/` sepenuhnya fiktif; pasangan password/hash pada `bcrypt-fixture.json` hanya vektor uji kompatibilitas bcrypt, bukan kredensial akun aplikasi.
+Tiga uji pertama tidak membutuhkan koneksi database. Uji koneksi hanya membaca metadata/view. Uji state opsional `php tests/serverless-state.php --allow-state-test` memakai driver `postgres` pada database/branch uji yang sudah berisi SQL 008; uji ini menulis/menghapus sesi sintetis dan membersihkan state kedaluwarsa, bukan data portal. Fixture dalam `tests/` sepenuhnya fiktif; pasangan password/hash pada `bcrypt-fixture.json` hanya vektor uji kompatibilitas bcrypt, bukan kredensial akun aplikasi.
 
 Status pengujian salinan repository dicatat di `docs/REPOSITORY-CHECK.md`. Screenshot, log, sesi dan keluaran pengujian lokal tidak disertakan. Aplikasi asli yang sudah berjalan tetap berada di folder sumber terpisah.
 

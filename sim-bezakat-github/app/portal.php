@@ -19,21 +19,15 @@ function login(array $v): array {
     $id=strtoupper(trim($v['idBeasiswa']));
     // Match the actual v2 schema. The demo-only BZI-001 coordinator is not a valid DB ID.
     if (!preg_match('/^BZI-251-000[0-9]{4}$/D',$id) || $id==='BZI-251-0000000') throw new PortalError(401,'ID beasiswa atau kata sandi tidak sesuai.');
-    // Shared per-ID lock file: persists across PHP sessions and concurrent requests.
-    $file=fopen(ROOT.'/storage/login-'.hash('sha256',$id).'.json','c+');
-    if (!$file || !flock($file,LOCK_EX)) throw new PortalError(503,'Pembatas login belum siap.');
+    $attemptToken=login_attempt_begin($id);$success=false;
     try {
-        $attempt=json_decode(stream_get_contents($file)?:'{}',true)?:[];
-        if (($attempt['until']??0)<=time()) $attempt=['count'=>0,'until'=>time()+900];
-        if (($attempt['count']??0)>=10) throw new PortalError(429,'Terlalu banyak percobaan. Coba lagi dalam 15 menit.');
-        $attempt['count']++;ftruncate($file,0);rewind($file);fwrite($file,json_encode($attempt));fflush($file);
         $r=query_one('SELECT * FROM sim_bezakat.v_portal_akun WHERE id_beasiswa=?',[$id]);
         // bcryptjs hashes are compatible with PHP password_verify ($2a/$2b/$2y).
         $hash=$r['password_hash']??'$2y$12$C6UzMDM.H6dfI/f/IKcEe.5oG.4C25FG0jtqf0ePOlCWMLvhqYOCi';
         $valid=password_verify($v['password'],$hash);
         if (!$r || !db_bool($r['status_aktif']) || !str_starts_with($hash,'$2') || !$valid) throw new PortalError(401,'ID beasiswa atau kata sandi tidak sesuai.');
-        ftruncate($file,0);
-    } finally { flock($file,LOCK_UN);fclose($file); }
+        $success=true;
+    } finally { login_attempt_end($attemptToken,$id,$success); }
     session_regenerate_id(true);$_SESSION['accountId']=(string)$r['id_akun'];$_SESSION['signedAt']=time();unset($_SESSION['csrf']);csrf();
     return public_user($r);
 }

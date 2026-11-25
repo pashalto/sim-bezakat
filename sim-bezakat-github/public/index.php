@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require dirname(__DIR__).'/app/bootstrap.php';
 $page=(string)($_GET['page']??'dashboard');
-$preview=isset($_GET['preview'])&&env('BEZAKAT_ENABLE_PREVIEW')==='1'&&in_array($_SERVER['REMOTE_ADDR']??'', ['127.0.0.1','::1'],true);
+$preview=env('VERCEL')!=='1'&&isset($_GET['preview'])&&env('BEZAKAT_ENABLE_PREVIEW')==='1'&&in_array($_SERVER['REMOTE_ADDR']??'', ['127.0.0.1','::1'],true);
 $GLOBALS['preview']=$preview;
 $data=null;$GLOBALS['pageError']='';
 try {

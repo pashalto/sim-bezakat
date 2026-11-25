@@ -12,15 +12,31 @@ if (is_file(ROOT . '/.env.local')) {
     }
 }
 function env(string $name, string $default = ''): string { return getenv($name) === false ? $default : (string)getenv($name); }
+final class PortalError extends RuntimeException {
+    public function __construct(public int $status, string $message) { parent::__construct($message); }
+}
+require __DIR__.'/database.php';
+require __DIR__.'/server-state.php';
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
-ini_set('error_log', ROOT . '/storage/php.log');
+ini_set('error_log', env('VERCEL')==='1'?'/dev/stderr':ROOT.'/storage/php.log');
 ini_set('session.use_strict_mode', '1');
 ini_set('session.gc_maxlifetime', '28800');
 session_name('sim_bezakat_php');
-session_save_path(ROOT . '/storage');
-session_set_cookie_params(['lifetime'=>0, 'path'=>'/', 'secure'=>!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly'=>true, 'samesite'=>'Strict']);
-if (PHP_SAPI !== 'cli' || !defined('NO_SESSION')) session_start();
+session_set_cookie_params(['lifetime'=>0, 'path'=>'/', 'secure'=>request_https(), 'httponly'=>true, 'samesite'=>'Strict']);
+if (PHP_SAPI !== 'cli' || !defined('NO_SESSION')) {
+    try{
+        if(session_driver()==='postgres'){
+            session_set_save_handler(new PostgresSessionHandler(),true);
+            ini_set('session.gc_probability','1');ini_set('session.gc_divisor','100');
+        }else session_save_path(ROOT.'/storage');
+        if(!session_start())throw new RuntimeException('Session unavailable');
+    }catch(Throwable $error){
+        // No filesystem fallback on serverless and no connection details in the response.
+        http_response_code(503);header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store');echo '{"error":"Penyimpanan sesi belum siap. Periksa konfigurasi database dan SQL serverless."}';exit;
+    }
+}
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
 header('X-Frame-Options: DENY');
@@ -31,15 +47,12 @@ $GLOBALS['reportSections'] = $questions['reportSections'];
 $GLOBALS['exclusiveOptions'] = $questions['exclusiveOptions'];
 $GLOBALS['monthNames'] = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 $GLOBALS['reviewReasons'] = ['Belum lengkap','Data tidak konsisten','Bukti tidak sesuai','Berkas tidak terbaca','Tautan tidak dapat diakses'];
-require __DIR__.'/database.php';
 require __DIR__.'/portal.php';
 require __DIR__.'/render.php';
 require __DIR__.'/contexts.php';
 
-final class PortalError extends RuntimeException {
-    public function __construct(public int $status, string $message) { parent::__construct($message); }
-}
 function json_response(mixed $data, int $status=200): never {
+    if(session_status()===PHP_SESSION_ACTIVE&&!session_write_close())throw new PortalError(503,'Sesi belum berhasil disimpan.');
     http_response_code($status); header('Content-Type: application/json; charset=utf-8');
     echo json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR); exit;
 }
@@ -67,7 +80,7 @@ function request_body(): array {
 function csrf(): string { return $_SESSION['csrf'] ??= bin2hex(random_bytes(32)); }
 function check_request(): void {
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    $scheme = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
+    $scheme = request_https() ? 'https' : 'http';
     if ($origin !== $scheme.'://'.($_SERVER['HTTP_HOST'] ?? '')) throw new PortalError(403,'Permintaan harus berasal dari website ini.');
     if (!hash_equals(csrf(), $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '')) throw new PortalError(403,'Sesi formulir berakhir. Muat ulang halaman.');
 }

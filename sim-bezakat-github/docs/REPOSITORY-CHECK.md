@@ -2,6 +2,8 @@
 
 Tanggal: 25 November 2026.
 
+**Catatan historis:** hasil di bawah mencatat tahap perapian GitHub sebelum penambahan dukungan Vercel/Neon. Untuk perubahan dan verifikasi deploy terbaru, lihat [VERCEL-NEON.md](VERCEL-NEON.md).
+
 ## Isi dan struktur
 
 Folder ini adalah satu root aplikasi PHP native, bukan salinan bertingkat dari proyek Next.js. Source awal tetap tersedia di luar folder ini. Tidak ada migrasi bahasa/framework dalam pekerjaan persiapan repository.
