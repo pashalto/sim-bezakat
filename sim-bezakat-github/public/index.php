@@ -20,7 +20,7 @@ try {
 }catch(Throwable $e){[$status,$message]=failure($e);if($status!==401)$GLOBALS['pageError']=$message;}
 $GLOBALS['portalData']=$data;
 ?><!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="<?=h(csrf())?>"><title>SIM-BEZAKAT</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/assets/portal.css"><link rel="stylesheet" href="/assets/native.css"><script src="/assets/portal.js" defer></script></head>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="<?=h(csrf())?>"><title>SIM-BEZAKAT</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/assets/portal.css"><link rel="stylesheet" href="/assets/native.css"><script src="/assets/portal.js" defer></script><?php if (in_array($page, ['finance','recap-detail','staff-detail'],true)): ?><script src="/assets/finance.js" defer></script><?php endif ?></head>
 <body class="min-h-screen bg-white text-zinc-950 antialiased"><div id="root" tabindex="-1">
 <?php if(!$data): echo view('LoginPage'); else:
     $account=$data['user'];$state=$data['state'];$profiles=(array)$state['profiles'];$periods=$state['periods'];$activePeriod=$data['activePeriod'];
@@ -50,7 +50,7 @@ try {
             case 'profile':if($profile)echo view('ProfilePage',$props);break;
             case 'transcript':echo view('TranscriptPage',$props+['transcripts'=>array_values(array_filter($state['transcripts'],fn($t)=>$t['ownerId']===$account['id']))]);break;
             case 'report':if($editing){echo view('MonthlyReportPage',$props+['period'=>$editing,'isActivePeriod'=>$current&&$editing['id']===$current['id'],'persistDraft'=>true,'clearDraft'=>true]);}else echo view('PageHeading',['eyebrow'=>'Laporan Bulanan','title'=>'Belum ada periode terbuka','description'=>'Laporan sebelumnya dapat dibuka melalui Rekapitulasi.']);break;
-            case 'finance':if($current)echo view('FinancePage',$props+['period'=>$current]);else echo view('PageHeading',['eyebrow'=>'Keuangan','title'=>'Belum ada periode terbuka','description'=>'Dokumen sebelumnya dapat dibuka melalui Rekapitulasi.']);break;
+            case 'finance':if($editing)echo view('FinancePage',$props+['period'=>$editing,'isActivePeriod'=>$current && $editing['id']===$current['id']]);else echo view('PageHeading',['eyebrow'=>'Keuangan','title'=>'Belum ada periode terbuka','description'=>'Dokumen sebelumnya dapat dibuka melalui Rekapitulasi.']);break;
             case 'recap':echo view('RecapPage',$props);break;
             case 'recap-detail':if($selected)echo view('PeriodDetail',array_merge($props,['period'=>$selected,'profile'=>$selected['profileSnapshot']??$profile,'openReport'=>true]));else echo view('AccessDenied');break;
         }

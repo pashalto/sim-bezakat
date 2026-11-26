@@ -2,23 +2,23 @@
 
 Portal monitoring penerima Beasiswa Zakat Indonesia untuk awardee, koordinator, pengelola LAZ, dan Kemenag. Aplikasi ini memakai **PHP native, PostgreSQL, HTML/CSS, dan JavaScript biasa**. Tidak memakai server Next.js/React/TypeScript.
 
-**Deploy ke proyek Vercel yang sudah ada dan Neon:** ikuti [panduan Vercel–Neon](docs/VERCEL-NEON.md). Konfigurasi `vercel.json` memakai runtime PHP komunitas; kode aplikasi tetap PHP. Panduan mencakup Root Directory, environment variables, role terbatas, migrasi 001–007, dan SQL tambahan penyimpanan sesi bersama.
+**Deploy ke proyek Vercel yang sudah ada dan Neon:** ikuti [panduan Vercel–Neon](docs/VERCEL-NEON.md). Konfigurasi `vercel.json` memakai runtime PHP komunitas; kode aplikasi tetap PHP. Panduan mencakup Root Directory, environment variables, role terbatas, migrasi domain 001–007 dan 009, serta SQL 008 untuk sesi bersama.
 
 ## Fitur
 
 - Login menggunakan `id_beasiswa`, logout, PHP session, serta pembatasan akses sesuai peran dan cakupan akun.
-- Dashboard, profil, transkrip/KHS, metadata keuangan, rekapitulasi, dan monitoring awardee.
+- Dashboard, profil, transkrip/KHS, unggah dan unduh dokumen keuangan privat, rekapitulasi, dan monitoring awardee.
 - Formulir laporan bulanan dengan 8 bagian dan 72 pertanyaan, pilihan tunggal/jamak, jawaban lainnya, dan daftar kegiatan.
 - Simpan dan kosongkan isian draf ke PostgreSQL; konflik versi draf ditolak.
 - Pemeriksaan koordinator per bagian/dokumen, persetujuan atau penolakan, dan penyimpanan batch dalam transaksi.
 - Laporan cetak A4 yang dapat disimpan sebagai PDF melalui browser.
 - Tampilan desktop dan ponsel dengan aset, ikon, font lokal, dan desain portal yang sudah ada.
 
-**Batas fitur:** edit profil, unggah foto/KHS/keuangan, unduh file fisik, dan pengajuan akhir laporan belum tersambung pada jalur PostgreSQL. Halamannya tetap tersedia sebagai tampilan hanya baca/fitur dinonaktifkan. LAZ dan Kemenag memakai monitoring hanya baca. Konfirmasi uang bulanan merupakan simulasi dalam session, bukan catatan pembayaran PostgreSQL. Metadata berkas dalam seed tidak berarti file fisiknya tersedia.
+**Batas fitur:** edit profil, unggah dan unduh foto/KHS, dan pengajuan akhir laporan belum tersambung pada jalur PostgreSQL. Halamannya tetap tersedia sebagai tampilan hanya baca/fitur dinonaktifkan. LAZ dan Kemenag memakai monitoring hanya baca. Konfirmasi uang bulanan merupakan simulasi dalam session, bukan catatan pembayaran PostgreSQL. Metadata berkas dalam seed tidak berarti file fisiknya tersedia.
 
 ## Kebutuhan dan dependensi
 
-- PHP 8.2 atau lebih baru, dengan `pdo_pgsql`, `mbstring`, `session`, dan JSON.
+- PHP 8.2 atau lebih baru dengan `pdo_pgsql`, `mbstring`, `session`, dan JSON. Pemeriksaan XLSX memakai `Phar`, `SimpleXML`, `zlib`, dan direktori sementara PHP yang dapat ditulis. Pada XAMPP, pastikan `upload_tmp_dir` di `php.ini` menunjuk ke direktori sementara yang dapat ditulis oleh PHP.
 - PostgreSQL 18 adalah versi yang telah diuji.
 - Browser modern.
 - Opsional: Apache dengan `mod_rewrite`, atau gunakan server bawaan PHP untuk pengembangan.
@@ -90,7 +90,7 @@ try {
 
 Jika server lokal sudah mengizinkan koneksi admin tanpa password, cukup jalankan perintah PHP di atas tanpa menyiapkan variabel admin.
 
-Alat memakai admin hanya untuk membuat role terbatas dan database baru, kemudian menjalankan SQL 001–007 sebagai migrator. Seed fiktif dipasang ke database kosong. Password aplikasi/migrator dan password akun fiktif dibuat secara lokal; nilai tersebut tidak dibundel dalam repository. Jangan ulangi alat ini sebagai cara memperbarui database berisi data.
+Alat memakai admin hanya untuk membuat role terbatas dan database baru, kemudian menjalankan migrasi domain 001–007 dan 009 sebagai migrator. Seed fiktif dipasang ke database kosong. Password aplikasi/migrator dan password akun fiktif dibuat secara lokal; nilai tersebut tidak dibundel dalam repository. Jangan ulangi alat ini sebagai cara memperbarui database berisi data.
 
 SQL struktur terletak pada `database/migrations/`; seed fiktif pada `database/seeds/001_demo.sql`. Seed memerlukan hash yang disediakan alat penyiapan, sehingga tidak dijalankan sendiri tanpa parameter yang sesuai. Tidak ada dump database asli dalam repository.
 
@@ -124,7 +124,7 @@ Password akun fiktif dihasilkan saat setup dan disimpan sebagai `BEZAKAT_TEST_PA
 app/                  bootstrap, PDO, session, validasi, aturan bisnis, renderer
 views/                halaman dan bagian tampilan PHP yang dapat dipakai ulang
 public/               document root, endpoint PHP, gambar, CSS, font, JavaScript
-database/migrations/  SQL struktur PostgreSQL berurutan 001–007
+database/migrations/  SQL struktur PostgreSQL domain 001–007 dan 009
 database/seeds/       data contoh fiktif, tanpa kredensial asli
 tools/                diagnosis koneksi dan penyiapan database baru
 api/index.php         entrypoint PHP dinamis khusus Vercel

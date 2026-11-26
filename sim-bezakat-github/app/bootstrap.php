@@ -80,10 +80,10 @@ function failure(Throwable $e): array {
         default => [503,'Koneksi database belum siap atau operasi gagal. Periksa konfigurasi lokal; detail rahasia tidak ditampilkan.'],
     };
 }
-function request_body(): array {
+function request_body(int $limit = 240000): array {
     if (!str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'application/json')) throw new PortalError(415,'Gunakan JSON.');
-    $raw = file_get_contents('php://input', false, null, 0, 240001);
-    if (strlen($raw) > 240000) throw new PortalError(413,'Isian terlalu besar.');
+    $raw = file_get_contents('php://input', false, null, 0, $limit + 1);
+    if (strlen($raw) > $limit) throw new PortalError(413, 'Ukuran permintaan melebihi batas.');
     try { $v = json_decode($raw, true, 64, JSON_THROW_ON_ERROR); }
     catch (JsonException) { throw new PortalError(400,'JSON tidak valid.'); }
     if (!is_array($v) || !str_starts_with(ltrim($raw), '{')) throw new PortalError(400,'Isian tidak valid.');

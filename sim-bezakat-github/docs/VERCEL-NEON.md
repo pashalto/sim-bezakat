@@ -78,7 +78,14 @@ Gunakan password unik yang memenuhi persyaratan Neon. Runtime aplikasi harus **b
 
 Jika database/role sudah ada, **jangan menjalankan ulang setup 000 atau memaksakan DROP**. Periksa owner, hak akses, dan versi skema terlebih dahulu. Bila skema domain sudah versi 7, jangan ulangi SQL 001–007. Bila nama database Neon berbeda dari `sim_bezakat_dev`, kode koneksi dapat menerimanya, tetapi SQL asal 003–007 dan seed mempunyai guard nama: pilih database baru bernama sesuai guard, atau minta penyesuaian migrasi secara terpisah; jangan menghapus guard secara otomatis.
 
-## Memasang skema 001–007, lalu state serverless
+## Memperbarui portal yang sudah menjalankan 001–008
+
+1. Pilih branch Neon untuk deployment yang dituju. Hubungkan melalui host langsung sebagai `sim_bezakat_migrator`. Periksa target dengan `SELECT current_database(), current_user;` dan `SELECT max(version) FROM sim_bezakat.schema_version;`. Untuk memasang 009, hasilnya harus `sim_bezakat_dev`, `sim_bezakat_migrator`, dan versi domain `7`.
+2. Jalankan hanya `database/migrations/009_finance_files.sql` sekali. Lewati jika versi 9 sudah terpasang. Migrasi menambahkan tabel privat `sim_bezakat.isi_berkas_keuangan` untuk isi PDF/Excel dan dua fungsi yang memeriksa cakupan akses. Metadata dan versi tetap tersimpan di `berkas_keuangan_versi`. Setiap versi menggunakan ruang penyimpanan Neon sesuai ukuran berkas.
+3. Di Vercel, pertahankan konfigurasi koneksi Neon serta sesi yang sudah bekerja. Fitur keuangan memakai role aplikasi yang sama dengan TLS `verify-full`. Tidak ada bucket atau token storage tambahan.
+4. Setelah redeploy, gunakan akun awardee uji, unggah PDF atau Excel maksimal 2 MiB, muat ulang halaman Keuangan, dan unduh kembali. Berkas lama yang hanya memiliki metadata seed belum mempunyai isi untuk diunduh.
+
+## Memasang skema pada database baru
 
 Hubungkan **langsung sebagai migrator**, bukan melalui `-pooler`. Dari root repository, contoh PowerShell berikut menjalankan masing-masing berkas sekali. Hentikan jika salah satu perintah gagal.
 
@@ -92,7 +99,8 @@ $migrationFiles = @(
   'database/migrations/005_clear_draft.sql',
   'database/migrations/006_coordinator_reviews.sql',
   'database/migrations/007_edit_coordinator_reviews.sql',
-  'database/deploy/008_serverless_state.sql'
+  'database/deploy/008_serverless_state.sql',
+  'database/migrations/009_finance_files.sql'
 )
 foreach ($file in $migrationFiles) {
   psql -X -W -v ON_ERROR_STOP=1 $migrationConnection -f $file
@@ -100,7 +108,7 @@ foreach ($file in $migrationFiles) {
 }
 ```
 
-Migrasi 001–007 dipertahankan apa adanya. `008_serverless_state.sql` adalah **tambahan deployment yang wajib** untuk driver `postgres`: dua tabel terpisah pada schema `sim_bezakat_runtime` untuk sesi dan pembatas login. Tidak mengubah tabel domain, PK/FK, atau nomor `sim_bezakat.schema_version` (tetap 7). Skrip 008 hanya dijalankan sekali setelah 007, sebagai migrator. Tidak dijalankan oleh build atau request web.
+Migrasi 001–007 dipertahankan apa adanya. `008_serverless_state.sql` adalah **tambahan deployment yang wajib** untuk driver `postgres`: dua tabel terpisah pada schema `sim_bezakat_runtime` untuk sesi dan pembatas login. Tidak mengubah tabel domain, PK/FK, atau nomor `sim_bezakat.schema_version` (masih 7 sebelum memasang 009). Skrip 008 hanya dijalankan sekali setelah 007, sebagai migrator. Tidak dijalankan oleh build atau request web.
 
 Akun aplikasi memperoleh USAGE schema dan EXECUTE fungsi state yang terbatas, **tanpa SELECT/INSERT/UPDATE/DELETE langsung** ke tabel sesi. Domain grants tetap dari SQL asal: view login dan fungsi `portal_*`, bukan grant CRUD global. Untuk role aplikasi yang sudah ada, admin dapat menyelaraskan timeout sebelum pemakaian pool baru:
 
