@@ -83,7 +83,24 @@ function helper(string $name,mixed ...$args): mixed {
         default=>throw new RuntimeException('Unsupported view helper: '.$name),
     };
 }
-function answered_in_section(array $p,array $s): int {$count=0;foreach($s['questions'] as $q){$v=jget($p['answers'],$q['id']);if(is_array($v)?count($v)>0:trim(jstr($v))!=='')$count++;}return $count;}
+function answered_in_section(array $p, array $s): int {
+    $count = 0;
+    foreach ($s['questions'] as $q) {
+        $value = jget($p['answers'], $q['id']);
+        $options = $q['options'] ?? [];
+        $filled = match ($q['type']) {
+            'single' => in_array($value, $options, true),
+            'multi' => is_array($value) && (bool)array_intersect($value, $options),
+            default => is_string($value) && preg_match('/[^\s\x{feff}]/u', $value),
+        };
+        if ($filled && $options && in_array('Lainnya', (array)$value, true)) {
+            $other = jget($p['answers'], $q['id'].'__other');
+            $filled = is_string($other) && preg_match('/[^\s\x{feff}]/u', $other);
+        }
+        if ($filled) $count++;
+    }
+    return $count;
+}
 function report_completion(array $p): int {$total=0;$filled=0;foreach($GLOBALS['reportSections'] as $s){$total+=count($s['questions']);$filled+=answered_in_section($p,$s);}return $total?min(100,(int)round($filled/$total*100)):0;}
 function finance_status(array $p): string {
     $docs=$p['financeDocuments']??[];if(!$docs)return 'draft';

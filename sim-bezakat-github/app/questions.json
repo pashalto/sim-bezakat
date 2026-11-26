@@ -127,7 +127,7 @@
           "id": "bullying_support",
           "label": "Jika membutuhkan dukungan, jelaskan secara singkat",
           "type": "textarea",
-          "hint": "Opsional. Jawaban ini tidak dinilai sebagai kesalahan."
+          "hint": "Jika tidak membutuhkan dukungan, tulis “Tidak perlu”. Jawaban ini tidak dinilai sebagai kesalahan."
         }
       ]
     },
@@ -454,7 +454,7 @@
           "id": "organization_evidence",
           "label": "Tautan bukti keikutsertaan",
           "type": "text",
-          "hint": "Opsional jika memilih Belum/Tidak Mengikuti."
+          "hint": "Jika belum atau tidak mengikuti, tulis “Tidak ada”."
         }
       ]
     },
@@ -758,7 +758,7 @@
           "id": "achievement_evidence",
           "label": "Tautan bukti pendukung",
           "type": "text",
-          "hint": "Opsional jika memilih Tidak Ada/Belum Ada."
+          "hint": "Jika belum ada bukti, tulis “Belum ada”."
         }
       ]
     },

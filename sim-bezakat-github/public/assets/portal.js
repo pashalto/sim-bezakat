@@ -2,7 +2,8 @@
 // Browser-only interactions. All durable records go through PHP -> PostgreSQL.
 let data=JSON.parse(document.querySelector('#portal-data')?.textContent||'null');
 let report=data?.period?structuredClone(data.period):null;
-let section=Number(new URL(location.href).searchParams.get('section')||0);
+if(report) report.answers={...report.answers};
+let section=Number(document.querySelector('[data-section].bg-emerald-800')?.dataset.section || 0);
 let dirty=false,busy=false;
 let lockedElements=[];
 const pending=new Map();let finalDecision=null, finalReason='';
@@ -19,16 +20,57 @@ async function save(clear=false){
   busy=true;document.body.setAttribute('aria-busy','true');lockedElements=$$('#portal-main fieldset,#portal-main button').map(el=>[el,el.disabled]);lockedElements.forEach(([el])=>el.disabled=true);
   try{
     const result=await api('drafts',clear?'DELETE':'PUT',clear?{periodId:target.periodId,version:target.version}:{periodId:target.periodId,version:target.version,answers:report.answers,activities:report.activities});
-    Object.assign(target,result.draft);report.answers=result.draft.answers;report.activities=result.draft.activities;dirty=false;
+    Object.assign(target,result.draft);report.answers={...result.draft.answers};report.activities=result.draft.activities;dirty=false;
     if(clear){$('#delete-draft-title')?.closest('dialog').close();await changeSection(section);}
     toast(clear?'Draft berhasil dihapus':'Draf berhasil disimpan ke PostgreSQL.');return true;
   }finally{busy=false;document.body.removeAttribute('aria-busy');lockedElements.forEach(([el,disabled])=>{if(el.isConnected)el.disabled=disabled;});refreshDeleteButton();}
 }
-async function changeSection(next){
+function hasOther(value) {
+  return value === 'Lainnya' || (Array.isArray(value) && value.includes('Lainnya'));
+}
+function missingAnswer(q) {
+  const value = report.answers[q.id];
+  if (q.type === 'multi') {
+    if (!Array.isArray(value) || !value.some(option => q.options.includes(option))) return q.id;
+  } else if (q.type === 'single') {
+    if (!q.options.includes(value)) return q.id;
+  } else if (typeof value !== 'string' || !value.trim()) return q.id;
+  if (q.options && hasOther(value) && !report.answers[q.id+'__other']?.trim()) return q.id+'__other';
+  return null;
+}
+let sectionChanging = false;
+async function navigateSection(next, saveFirst = false, start = section) {
+  if (sectionChanging || busy) return;
+  sectionChanging = true;
+  try {
+    const editable = ['draft','revision'].includes(report.reportStatus);
+    for (let i = start; editable && i < next; i++) {
+      const part = data.sections[i];
+      if (report.reportStatus === 'revision' && report.sectionReviews?.[part.key]?.status === 'approved') continue;
+      const question = part.questions.find(q => missingAnswer(q));
+      if (!question) continue;
+      if (section !== i) await changeSection(i, false);
+      const field = missingAnswer(question);
+      const number = part.questions.indexOf(question) + 1;
+      const instruction = field === question.id ? 'Isi jawaban' : 'Isi keterangan Lainnya';
+      toast(instruction + ' untuk ' + part.shortLabel + ', pertanyaan ' + number + ': ' + question.label);
+      const group = document.getElementById('question-' + question.id);
+      group?.querySelector('[data-question="' + CSS.escape(field) + '"]')?.focus({preventScroll:true});
+      group?.scrollIntoView({block:'center'});
+      return;
+    }
+    if (next === section) return;
+    if (saveFirst && editable && !(await save())) return;
+    await changeSection(next);
+  } finally {
+    sectionChanging = false;
+  }
+}
+async function changeSection(next, scroll = true){
   const url=new URL(location.href);next=Math.max(0,Math.min(data.sections.length-1,Number(next)));url.searchParams.set('section',String(next));
   const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('Gagal membuka bagian laporan.');
   const doc=new DOMParser().parseFromString(await response.text(),'text/html');const main=$('#portal-main',doc);if(!main)throw new Error('Sesi berakhir. Muat ulang halaman.');
-  $('#portal-main').replaceWith(main);history.replaceState({},'',url);section=next;hydrateAnswers();window.scrollTo({top:0,behavior:'smooth'});
+  $('#portal-main').replaceWith(main);history.replaceState({},'',url);section=next;hydrateAnswers();if(scroll)window.scrollTo({top:0,behavior:'smooth'});
 }
 function hydrateAnswers(){if(!report||data.page!=='report')return;
   $$('[data-question]').forEach(input=>{const value=report.answers[input.dataset.question];if(input.type==='radio')input.checked=value===input.value;else if(input.type==='checkbox')input.checked=Array.isArray(value)&&value.includes(input.value);else input.value=typeof value==='string'?value:'';});
@@ -49,7 +91,7 @@ function refreshChoices(){
   $$('[data-question][type=radio], [data-question][type=checkbox]').forEach(input=>{const label=input.closest('label');if(!label)return;label.classList.toggle('border-emerald-400',input.checked);label.classList.toggle('bg-emerald-50',input.checked);label.classList.toggle('text-emerald-900',input.checked);label.classList.toggle('border-slate-200',!input.checked);label.classList.toggle('text-slate-600',!input.checked);});
   $$('[data-other]').forEach(el=>{const value=report?.answers[el.dataset.other];el.hidden=!(value==='Lainnya'||Array.isArray(value)&&value.includes('Lainnya'));});
   refreshDeleteButton();
-  if(data?.page==='report'&&report){let total=0,answered=0;for(const s of data.sections){const count=s.questions.filter(q=>{const v=report.answers[q.id];return Array.isArray(v)?v.length>0:String(v||'').trim();}).length;total+=s.questions.length;answered+=count;$$('[data-section-count]').filter(el=>el.dataset.sectionCount===s.key).forEach(el=>{[...el.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).forEach(n=>n.remove());el.append(document.createTextNode(count+'/'+s.questions.length));});}const progress=Math.min(100,Math.round(answered/total*100));$$('[data-progress-label]').forEach(el=>el.textContent=progress+'%');$$('[data-progress-bar]').forEach(el=>el.style.width=progress+'%');}
+  if(data?.page==='report'&&report){let total=0,answered=0;for(const s of data.sections){const count=s.questions.filter(q=>!missingAnswer(q)).length;total+=s.questions.length;answered+=count;$$('[data-section-count]').filter(el=>el.dataset.sectionCount===s.key).forEach(el=>{[...el.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).forEach(n=>n.remove());el.append(document.createTextNode(count+'/'+s.questions.length));});}const progress=Math.min(100,Math.round(answered/total*100));$$('[data-progress-label]').forEach(el=>el.textContent=progress+'%');$$('[data-progress-bar]').forEach(el=>el.style.width=progress+'%');}
 }
 async function headerPanel(panel){const current=$('header');if(!current)return;if(current.dataset.openPanel===panel)panel=null;const url=new URL(location.href);if(panel)url.searchParams.set('panel',panel);else url.searchParams.delete('panel');const r=await fetch(url);const doc=new DOMParser().parseFromString(await r.text(),'text/html');const head=$('header',doc);if(head){if(panel)head.dataset.openPanel=panel;$('header').replaceWith(head);}}
 function reviewCard(button){return button.closest('[data-finance-card],[data-review-card]')||button.closest('section');}
@@ -71,11 +113,14 @@ document.addEventListener('submit',async event=>{
 });
 document.addEventListener('input',event=>{
   const input=event.target;if(input.dataset.question&&report){const key=input.dataset.question;
-    if(input.type==='radio')report.answers[key]=input.value;
+    // A second activation of a checked radio emits click but no input event.
+    if(input.type==='radio')return;
     else if(input.type==='checkbox'){
       let values=Array.isArray(report.answers[key])?report.answers[key]:[];
       if(data.exclusiveOptions.includes(input.value))values=input.checked?[input.value]:[];
-      else{values=values.filter(x=>!data.exclusiveOptions.includes(x)&&x!==input.value);if(input.checked)values.push(input.value);}report.answers[key]=values;hydrateAnswers();
+      else{values=values.filter(x=>!data.exclusiveOptions.includes(x)&&x!==input.value);if(input.checked)values.push(input.value);}report.answers[key]=values;
+      if (!hasOther(values)) delete report.answers[key+'__other'];
+      hydrateAnswers();
     }else report.answers[key]=input.value;
     dirty=true;refreshChoices();
   }
@@ -85,13 +130,29 @@ document.addEventListener('change',event=>{const el=event.target;if(el.dataset.a
   if(el.dataset.action==='select-receipt'){const card=el.closest('section');$('[data-action=receipt-dialog]',card).disabled=!el.checked;}
 });
 document.addEventListener('click',async event=>{
+ const radio=event.target.closest('input[type=radio][data-question]');
+ if (radio && report && !radio.matches(':disabled')) {
+   const key=radio.dataset.question;
+   if (report.answers[key] === radio.value) {
+     delete report.answers[key];
+     radio.checked=false;
+   } else {
+     report.answers[key]=radio.value;
+   }
+   if (!hasOther(report.answers[key])) delete report.answers[key+'__other'];
+   const other=document.querySelector('[data-question="'+CSS.escape(key+'__other')+'"]');
+   if (other && !hasOther(report.answers[key])) other.value='';
+   dirty=true;
+   refreshChoices();
+   return;
+ }
  const button=event.target.closest('button[data-action],button[data-nav],a[data-nav],button[data-section]');if(!button||button.disabled)return;
  event.preventDefault();try{
   if(button.dataset.nav){const page=button.dataset.nav;let period=button.dataset.period;
     if(page==='report'&&!period){period=data.drafts.find(d=>d.isOpen)?.periodId;if(!period){toast('Belum ada periode laporan yang dibuka.');return;}}
     location.href=destination(page,period);return;
   }
-  if(button.dataset.section!==undefined){await changeSection(button.dataset.section);return;}
+  if(button.dataset.section!==undefined){await navigateSection(Number(button.dataset.section));return;}
   switch(button.dataset.action){
    case 'toggle-password':{const input=$('input[name=password]');input.type=input.type==='password'?'text':'password';button.setAttribute('aria-label',input.type==='password'?'Tampilkan kata sandi':'Sembunyikan kata sandi');break;}
    case 'open-menu':$('aside').setAttribute('data-mobile-open','');$('#menu-backdrop').hidden=false;break;
@@ -101,8 +162,8 @@ document.addEventListener('click',async event=>{
    case 'logout':await api('logout','POST',{});location.href='/';break;
    case 'back':location.href=destination(data.page==='report'?'dashboard':data.user.role==='awardee'?'recap':data.user.role==='coordinator'?'awardees':'monitoring');break;
    case 'save-draft':await save();break;
-   case 'next-section':if(await save())await changeSection(section+1);break;
-   case 'previous-section':await changeSection(section-1);break;
+   case 'next-section':await navigateSection(section+1,true);break;
+   case 'previous-section':await navigateSection(section-1);break;
    case 'delete-dialog':$('#delete-draft-title').closest('dialog').showModal();break;
    case 'close-dialog':button.closest('dialog').close();break;
    case 'clear-draft':await save(true);break;
@@ -145,3 +206,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('aside')?.removeA
 document.addEventListener('pointerdown',e=>{if($('header')?.dataset.openPanel&&!e.target.closest('header .relative'))void headerPanel(null);});
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 hydrateAnswers();
+if (data?.page === 'report' && report && section > 0) {
+  navigateSection(section, false, 0).catch(error => toast(error.message));
+}
