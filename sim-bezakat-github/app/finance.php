@@ -91,3 +91,29 @@ function finance_download(array $user): never {
     if (!$file) throw new PortalError(404, 'Isi berkas belum tersedia atau dokumen berada di luar cakupan akun.');
     json_response($file);
 }
+
+
+function finance_delete_input(array $input): array {
+    if (array_diff(array_keys($input), ['periodId','category','documentId']) ||
+        !is_string($input['periodId'] ?? null) || !preg_match('/^-?\d{1,18}$/D', $input['periodId']) ||
+        !is_string($input['documentId'] ?? null) || !preg_match('/^-?\d{1,18}$/D', $input['documentId']) ||
+        !in_array($input['category'] ?? null, ['current','next'], true)) {
+        throw new PortalError(422, 'Periode, jenis, atau identitas dokumen tidak valid.');
+    }
+    return $input;
+}
+
+function finance_delete(array $user): never {
+    if ($user['role'] !== 'awardee') throw new PortalError(403, 'Hanya awardee dapat menghapus dokumen miliknya.');
+    $input = finance_delete_input(request_body());
+    try {
+        $result = query_one('SELECT * FROM sim_bezakat.portal_hapus_keuangan(?,?,?,?)',
+            [$user['id'], $input['periodId'], $input['category'] === 'current' ? 'periode_berjalan' : 'rencana_berikutnya', $input['documentId']]);
+    } catch (PDOException $error) {
+        $state = $error->errorInfo[0] ?? (string)$error->getCode();
+        if ($state === '40001') throw new PortalError(409, 'Dokumen sudah berubah. Muat ulang kartu sebelum menghapus.');
+        if ($state === '23514') throw new PortalError(409, 'Dokumen tidak dapat dihapus: laporan/periode terkunci atau dokumen sudah disetujui.');
+        throw $error;
+    }
+    json_response(['id'=>$result['id'], 'category'=>$input['category'], 'historyRetained'=>db_bool($result['history_retained'])]);
+}

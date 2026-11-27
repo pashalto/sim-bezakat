@@ -5,7 +5,7 @@ define('NO_SESSION', true);
 require dirname(__DIR__).'/app/bootstrap.php';
 try{
     $db=database();$db->beginTransaction();$db->exec('SET TRANSACTION READ ONLY');
-    $expected=['portal_ringkasan','portal_daftar_draf','portal_simpan_draf','portal_hapus_isian_draf','portal_daftar_pemeriksaan','portal_simpan_pemeriksaan','portal_unggah_keuangan','portal_unduh_keuangan'];
+    $expected=['portal_ringkasan','portal_daftar_draf','portal_simpan_draf','portal_hapus_isian_draf','portal_daftar_pemeriksaan','portal_simpan_pemeriksaan','portal_unggah_keuangan','portal_unduh_keuangan','portal_hapus_keuangan'];
     foreach($expected as $name){$s=$db->prepare("SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='sim_bezakat' AND p.proname=?");$s->execute([$name]);if((int)$s->fetchColumn()!==1)throw new PortalError(503,'Fungsi skema terbaru belum tersedia: '.$name);}
     $db->query('SELECT * FROM sim_bezakat.v_portal_akun LIMIT 0');
     if(session_driver()==='postgres'){

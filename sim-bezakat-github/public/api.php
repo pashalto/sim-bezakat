@@ -11,14 +11,15 @@ try{
         $_SESSION=[];session_regenerate_id(true);csrf();json_response(['ok'=>true]);
     }
     $user=current_user();
-    if ($action === 'finance-upload' || $action === 'finance-download') {
+    if ($action === 'finance-upload' || $action === 'finance-download' || $action === 'finance-delete') {
         require dirname(__DIR__).'/app/finance.php';
-        $allowed = $action === 'finance-upload' ? 'POST' : 'GET';
+        $allowed = match($action) { 'finance-upload'=>'POST', 'finance-delete'=>'DELETE', default=>'GET' };
         if ($method !== $allowed) {
             header('Allow: '.$allowed);
             throw new PortalError(405, 'Metode tidak diizinkan.');
         }
         if ($action === 'finance-upload') finance_upload($user);
+        if ($action === 'finance-delete') finance_delete($user);
         finance_download($user);
     }
     if($action==='receipt'&&$method==='POST'){

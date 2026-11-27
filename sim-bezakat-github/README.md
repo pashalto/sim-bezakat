@@ -169,3 +169,8 @@ git push -u origin main
 Ganti URL placeholder dengan repository tujuan. Periksa daftar staged sebelum commit: `.env.local`, sesi, log, dump, unggahan dan kredensial migrator tidak boleh muncul. Gunakan autentikasi GitHub melalui credential manager/SSH; jangan menaruh token pada URL remote. Jika remote sudah berisi commit, selaraskan riwayat terlebih dahulu dan jangan memakai force push secara otomatis.
 
 Folder distribusi ini tidak menyertakan `.git` sumber. Persiapan berkas tidak melakukan commit, perubahan riwayat, push, atau publikasi otomatis.
+
+
+## Hapus dokumen keuangan
+
+Fitur hapus memakai backend PostgreSQL dan mempertahankan riwayat pengajuan. Sebelum menjalankan versi ini, terapkan SQL tambahan 010 setelah 009 sebagai migrator. Lihat [penyiapan dan hasil pengujian](docs/FINANCE-DELETE.md). Uji tambahan: `php tests/finance-delete.php`.
